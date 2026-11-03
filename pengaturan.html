@@ -96,7 +96,7 @@
               <span class="d-none d-md-inline" id="user-nama">...</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li><h6 class="dropdown-header" id="user-username">...</h6></li>
+              <li><h6 class="dropdown-header" id="user-detail-username">...</h6></li>
               <li><hr class="dropdown-divider"></li>
               <li>
                 <a class="dropdown-item text-danger" href="#" onclick="logout()">
@@ -235,7 +235,7 @@
             <div class="input-group">
               <span class="input-group-text"><i class="bi bi-person"></i></span>
               <input type="text" class="form-control" id="user-username" required
-                     pattern="[a-zA-Z0-9._-]{3,50}" title="3-50 karakter: huruf, angka, titik, _, -">
+                     pattern="[a-zA-Z0-9._\-]{3,50}" title="3-50 karakter: huruf, angka, titik, _, -">
             </div>
           </div>
           <div class="mb-3">
@@ -536,7 +536,7 @@ let sesiUser = null;
   if (u.role !== 'admin') { location.href = 'dashboard.html'; return; }
 
   document.getElementById('user-nama').textContent     = u.nama || u.username;
-  document.getElementById('user-username').textContent = u.role.toUpperCase() + ' \u2014 ' + u.username;
+  document.getElementById('user-detail-username').textContent = u.role.toUpperCase() + ' \u2014 ' + u.username;
 
   modalUser = new bootstrap.Modal('#modalUser');
   await Promise.all([muatPengaturan(), muatUser(), cekDatabase()]);
