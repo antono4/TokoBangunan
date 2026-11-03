@@ -22,7 +22,8 @@
   /* Panel kiri: gambar */
   .login-image {
     position: relative;
-    flex: 0 0 44%;
+    flex: 0 0 50%;
+    height: 100vh;
     min-height: 100vh;
     display: none; /* sembunyi di HP, tampil di desktop */
   }
@@ -40,81 +41,47 @@
   .login-image .overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(27,36,49,.72) 0%, rgba(13,110,253,.45) 100%);
+    background: linear-gradient(135deg, rgba(27,36,49,.78) 0%, rgba(13,110,253,.55) 100%);
   }
   .login-image .brand-content {
     position: relative;
     z-index: 2;
     text-align: center;
     color: #fff;
-    padding: 2rem;
+    padding: 3rem 2rem;
     width: 100%;
-  }
-  .login-image .brand-content i {
-    font-size: 3.5rem;
-    color: #ffc107;
-    margin-bottom: 1rem;
-    display: block;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,.4));
-  }
-  .login-image .brand-content h2 {
-    font-weight: 800;
-    letter-spacing: .5px;
-    font-size: 2.1rem;
-    margin: 0 0 .5rem;
-  }
-  .login-image .brand-content p {
-    margin: 0;
-    opacity: .95;
-    font-size: 1.05rem;
-  }
-  .login-image .brand-content .tagline {
-    margin-top: .75rem;
-    font-size: .9rem;
-    opacity: .85;
-    max-width: 260px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 
   /* Panel kanan: form login */
   .login-form-panel {
-    flex: 1 1 56%;
+    flex: 1 1 50%;
+    height: 100vh;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
     padding: 2rem 1rem;
+    background: #f8f9fa;
   }
 
   .login-card {
     width: 100%;
-    max-width: 420px;
+    max-width: 400px;
     border: none;
-    border-radius: 1.25rem;
-    box-shadow: 0 20px 50px rgba(0,0,0,.18);
+    border-radius: 1.5rem;
+    box-shadow: 0 24px 60px rgba(0,0,0,.16);
     /* Efek Glassmorphism */
-    background: rgba(255,255,255,.82);
-    backdrop-filter: blur(20px) saturate(1.2);
-    -webkit-backdrop-filter: blur(20px) saturate(1.2);
-    border: 1px solid rgba(255,255,255,.65);
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    border: 1px solid rgba(255,255,255,.7);
   }
   .login-card .card-body {
-    padding: 2rem 1.75rem;
-  }
-
-  /* Panel kanan juga dapat sentuhan kaca lembut */
-  .login-form-panel {
-    flex: 1 1 56%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 2rem 1rem;
-    background: rgba(255,255,255,.45);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    padding: 2.5rem 2rem;
   }
   .login-card .login-header {
     text-align: center;
@@ -148,20 +115,20 @@
     margin-top: 1.5rem;
   }
 
-  /* Responsive: HP -> susun vertikal (gambar di atas, form di bawah) */
+  /* Responsif: HP -> susun vertikal */
   @media (max-width: 767.98px) {
     .login-wrap { flex-direction: column; }
     .login-image {
       display: block;
       flex: 0 0 auto;
-      min-height: auto;
-      height: 30vh;
-      min-height: 220px;
+      height: 32vh;
+      min-height: 240px;
     }
-    .login-image .brand-content { padding: 1rem; }
+    .login-image .brand-content { padding: 1.5rem 1rem; }
     .login-image .brand-content h2 { font-size: 1.5rem; }
     .login-image .brand-content i { font-size: 2.2rem; }
     .login-form-panel { flex: 1; padding: 1.5rem 1rem; }
+    .login-card { max-width: 100%; border-radius: 1rem; }
   }
 </style>
 </head>
