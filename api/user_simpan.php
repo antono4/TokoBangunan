@@ -7,9 +7,9 @@
  *          Password opsional saat update (isi saja bila ingin ganti).
  *
  * Aturan keamanan:
- *  - role hanya 'admin' atau 'kasir'
+ *  - role hanya 'admin', 'kasir' atau 'gudang'
  *  - username unik
- *  - tidak boleh menurunkan level admin TERAKHIR menjadi kasir
+ *  - tidak boleh menurunkan level admin TERAKHIR menjadi kasir/gudang
  *
  * Akses: admin saja.
  */
@@ -34,7 +34,7 @@ if (strlen($user) < 3 || strlen($user) > 50)   $errors[] = 'Username 3-50 karakt
 if (!preg_match('/^[a-zA-Z0-9._-]+$/', $user)) $errors[] = 'Username hanya boleh huruf, angka, titik, garis bawah, dan minus.';
 if (strlen($nama) > 100)                       $errors[] = 'Nama lengkap maksimal 100 karakter.'; 
 
-if (!in_array($role, ['admin', 'kasir'], true)) $errors[] = 'Level user harus admin atau kasir.';
+if (!in_array($role, ['admin', 'kasir', 'gudang'], true)) $errors[] = 'Level user harus admin, kasir atau gudang.';
 if ($id === null && strlen($pass) < 4)          $errors[] = 'Password minimal 4 karakter.';
 if ($errors) json_out(['ok' => false, 'message' => implode(' ', $errors)], 422);
 
@@ -49,7 +49,7 @@ if ($ada && (!$id || (int)$ada['id'] !== $id)) {
 }
 
 // ---- Jangan izinkan menurunkan admin terakhir ----
-if ($id !== null && $role === 'kasir') {
+if ($id !== null && $role !== 'admin') {
     $target = $pdo->prepare('SELECT role FROM users WHERE id = ?');
     $target->execute([$id]);
     $targetRole = $target->fetchColumn();

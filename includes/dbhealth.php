@@ -245,6 +245,14 @@ function dbhealth_repair(): array
         $gagal[] = 'Trigger: ' . $e->getMessage();
     }
 
+    // ---- 2b. Role user perlu mendukung 'gudang' (warehouse) ----
+    try {
+        $pdo->exec("ALTER TABLE users MODIFY role ENUM('admin','kasir','gudang') NOT NULL DEFAULT 'kasir'");
+        $kasus[] = 'Role user diperluas: admin / kasir / gudang.';
+    } catch (PDOException $e) {
+        $gagal[] = 'Role user: ' . $e->getMessage();
+    }
+
     // ---- 3. Akun default bila tabel users kosong ----
     try {
         $jumlah = (int)$pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();

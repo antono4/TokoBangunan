@@ -24,7 +24,7 @@ CREATE TABLE users (
   username     VARCHAR(50)   NOT NULL,
   password     VARCHAR(255)  NOT NULL COMMENT 'Simpan HASH (bcrypt/password_hash), jangan plain text',
   nama_lengkap VARCHAR(100)  DEFAULT NULL,
-  role         ENUM('admin','kasir') NOT NULL DEFAULT 'kasir',
+  role         ENUM('admin','kasir','gudang') NOT NULL DEFAULT 'kasir',
   created_at   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_users_username (username)

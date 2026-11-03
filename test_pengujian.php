@@ -310,6 +310,13 @@ hasil('Reset password via admin & login berhasil', $lg3['kode'] === 200);
 $h = kirim($BASE . 'user_hapus.php', $adminSess, ['id' => $nu['json']['id']]);
 hasil('Hapus user kasir2 (belum transaksi)', $h['kode'] === 200 && $h['json']['ok'] === true);
 
+// tambah user level gudang (warehouse) lalu bersihkan
+$ng = kirim($BASE . 'user_simpan.php', $adminSess, [
+    'username' => 'gudang1', 'nama_lengkap' => 'Gudang Satu', 'password' => 'gudang123', 'role' => 'gudang']);
+hasil('Tambah user level gudang (warehouse) sukses', $ng['kode'] === 200 && $ng['json']['ok'] === true);
+$hg = kirim($BASE . 'user_hapus.php', $adminSess, ['id' => $ng['json']['id']]);
+hasil('Hapus user gudang1 (cleanup)', $hg['kode'] === 200 && $hg['json']['ok'] === true);
+
 // hapus diri sendiri ditolak
 $me3 = getData($BASE . 'me.php', $adminSess);
 $h2 = kirim($BASE . 'user_hapus.php', $adminSess, ['id' => $me3['json']['user']['id']]);
