@@ -1,4 +1,4 @@
-# 🏗️ Toko Bangunan — Aplikasi Penjualan (POS)
+#       🏗️ Toko Bangunan — Aplikasi Penjualan (POS)
 
 Aplikasi kasir &amp; manajemen toko bangunan berbasis web: input penjualan cepat,
 stok berkurang **otomatis**, struk siap cetak, laporan + grafik, serta halaman
