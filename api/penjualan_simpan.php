@@ -141,6 +141,26 @@ try {
         $pelangganNama = $stmtP->fetchColumn();
     }
 
+// ---- 6. Notifikasi: setelah transaksi sukses, cek produk yang stoknya menipis ----
+try {
+    require_once __DIR__ . '/../includes/notif.php';
+    $notifIds = array_map(function ($r) { return (int)$r['produk_id']; }, $detail);
+    if (!empty($notifIds)) {
+        $marks = implode(',', array_fill(0, count($notifIds), '?'));
+        $st = $pdo->prepare(
+            "SELECT id, kode_produk, nama_produk, satuan, stok, stok_minimum
+               FROM produk
+              WHERE id IN ($marks) AND stok <= stok_minimum
+              ORDER BY stok ASC"
+        );
+        $st->execute($notifIds);
+        $stokMenipis = $st->fetchAll();
+        notifKirimStokMenipis($stokMenipis);
+    }
+} catch (Throwable $e) {
+    // Notifikasi tidak boleh menghentikan transaksi yang valid.
+}
+
     json_out([
         'ok' => true,
         'message' => "Transaksi $noFaktur berhasil disimpan.",
