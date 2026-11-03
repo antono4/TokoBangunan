@@ -17,14 +17,31 @@ if ($username === '' || $password === '') {
     json_out(['ok' => false, 'message' => 'Username dan password wajib diisi.'], 422);
 }
 
-$stmt = db()->prepare('SELECT id, username, password, nama_lengkap, role FROM users WHERE username = ? LIMIT 1');
-$stmt->execute([$username]);
-$user = $stmt->fetch();
+try {
+    $stmt = db()->prepare('SELECT id, username, password, nama_lengkap, role FROM users WHERE username = ? LIMIT 1');
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+} catch (PDOException $e) {
+    // Tabel users tidak ada / kosong -> beri petunjuk yang jelas (import SQL)
+    if (in_array($e->getCode(), ['42S02', '1146'], true)) {
+        json_out([
+            'ok' => false,
+            'message' => 'Tabel "users" belum ada. Database belum diimport: '
+                . 'buka http://localhost/phpmyadmin -> tab Import -> pilih db_tokobangunan.sql -> Import.',
+            'kode' => 'DATABASE_BELUM_ADA',
+        ], 401);
+    }
+    json_out(['ok' => false, 'message' => 'Terjadi galat database: ' . $e->getMessage()], 500);
+}
 
-if (!$user || !password_verify($password, $user['password'])) {
+if (!$user) {
+    usleep(300000);
+    json_out(['ok' => false, 'message' => 'Username tidak terdaftar.'], 401);
+}
+if (!password_verify($password, $user['password'])) {
     // Sedikit delay untuk memperlambat brute force
     usleep(300000);
-    json_out(['ok' => false, 'message' => 'Username atau password salah.'], 401);
+    json_out(['ok' => false, 'message' => 'Password salah untuk user "' . $username . '".'], 401);
 }
 
 // Regenerasi ID session untuk mencegah session fixation

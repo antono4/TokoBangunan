@@ -101,7 +101,7 @@ CREATE TABLE penjualan (
     ON UPDATE CASCADE,
   CONSTRAINT fk_penjualan_pelanggan
     FOREIGN KEY (pelanggan_id) REFERENCES pelanggan (id)
-    ON DELETE SET NULL
+    ON DELETE RESTRICT
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

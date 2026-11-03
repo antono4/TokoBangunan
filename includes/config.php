@@ -36,8 +36,12 @@ function db(): PDO
             header('Content-Type: application/json');
             echo json_encode([
                 'ok'      => false,
-                'message' => 'Koneksi database gagal: ' . $e->getMessage(),
-            ]);
+                'message' => 'Koneksi database gagal (' . $e->getMessage() . ').'
+                    . ' Checklist: (1) MySQL di Control Panel XAMPP sudah Start;'
+                    . ' (2) cek DB_HOST/DB_USER/DB_PASS di includes/config.php;'
+                    . ' (3) database "db_tokobangunan" sudah diimport via phpMyAdmin.',
+                'kode'    => 'KONEKSI_GAGAL',
+            ], JSON_UNESCAPED_UNICODE);
             exit;
         }
     }
