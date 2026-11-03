@@ -40,9 +40,19 @@ supplier, serta tombol tambah/edit/hapus.
 
 ### 5. Pengaturan &amp; User (khusus admin)
 Edit **nama/alamat/telepon toko** (otomatis dipakai di seluruh aplikasi dan struk),
-kelola akun user beserta **level**-nya.
+kelola akun user beserta **level**-nya, serta tombol **Periksa &amp; Perbaiki** database.
 
 ![Pengaturan & User](docs/img/05-pengaturan.png)
+
+### 6. Laporan Penjualan
+Grafik omzet harian, produk terlaris, rincian transaksi, dan **export CSV** siap dibuka Excel.
+
+![Laporan Penjualan](docs/img/06-laporan.jpeg)
+
+### 7. Pelanggan & Supplier
+Daftar pelanggan (termasuk tipe **kontraktor** yang berhak faktur A4) dan master supplier dengan jumlah produk.
+
+![Pelanggan & Supplier](docs/img/07-pelanggan.jpeg)
 
 ---
 
