@@ -169,10 +169,45 @@ function dbhealth_repair(): array
         $pdo->exec("INSERT IGNORE INTO pengaturan (kunci, nilai) VALUES
             ('nama_toko',    'TOKO BANGUNAN MANDIRI'),
             ('alamat_toko',  'Jl. Raya Merdeka No. 123, Depok'),
-            ('telepon_toko', '(021) 555-0123')");
+            ('telepon_toko', '(021) 555-0123'),
+            ('pajak',        '0.12')");
         $kasus[] = 'Tabel pengaturan dipastikan ada & terisi.';
     } catch (PDOException $e) {
         $gagal[] = 'Tabel pengaturan: ' . $e->getMessage();
+    }
+
+    // ---- 1b. Tabel retur & retur_detail (nota kredit) ----
+    try {
+        $pdo->exec('CREATE TABLE IF NOT EXISTS retur (
+            id            INT(11)      NOT NULL AUTO_INCREMENT,
+            no_faktur    VARCHAR(30)  NOT NULL,
+            tanggal       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            user_id      INT(11)      NOT NULL,
+            pelanggan_id INT(11)      NULL,
+            total_retur  DECIMAL(14,2) NOT NULL DEFAULT 0,
+            alasan       VARCHAR(255) NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY uq_retur_faktur (no_faktur),
+            CONSTRAINT fk_retur_faktur FOREIGN KEY (no_faktur) REFERENCES penjualan (no_faktur) ON DELETE RESTRICT ON UPDATE CASCADE,
+            CONSTRAINT fk_retur_user   FOREIGN KEY (user_id)   REFERENCES users (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+            CONSTRAINT fk_retur_pelanggan FOREIGN KEY (pelanggan_id) REFERENCES pelanggan (id) ON DELETE SET NULL ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
+        $pdo->exec('CREATE TABLE IF NOT EXISTS retur_detail (
+            id          INT(11)      NOT NULL AUTO_INCREMENT,
+            retur_id    INT(11)      NOT NULL,
+            produk_id   INT(11)      NOT NULL,
+            jumlah      INT(11)      NOT NULL,
+            harga_satuan DECIMAL(12,2) NOT NULL,
+            subtotal    DECIMAL(14,2) NOT NULL,
+            PRIMARY KEY (id),
+            KEY idx_retur_detail (retur_id),
+            KEY idx_retur_produk (produk_id),
+            CONSTRAINT fk_retur_detail_retur FOREIGN KEY (retur_id) REFERENCES retur (id) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT fk_retur_detail_produk FOREIGN KEY (produk_id) REFERENCES produk (id) ON DELETE RESTRICT ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
+        $kasus[] = 'Tabel retur & retur_detail dipastikan ada.';
+    } catch (PDOException $e) {
+        $gagal[] = 'Tabel retur: ' . $e->getMessage();
     }
 
     // ---- 2. Trigger stok (drop lalu buat ulang agar pasti sesuai) ----

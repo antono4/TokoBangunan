@@ -14,6 +14,7 @@ const KUNCI_DEFAULT = [
     'nama_toko'    => 'TOKO BANGUNAN MANDIRI',
     'alamat_toko'  => 'Jl. Raya Merdeka No. 123, Depok',
     'telepon_toko' => '(021) 555-0123',
+    'pajak'        => '0.12',
 ];
 
 /** Ambil seluruh pengaturan sebagai assoc array. */
@@ -37,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_login(['admin']);
 
     $input = json_input();
-    $batas = ['nama_toko' => 100, 'alamat_toko' => 200, 'telepon_toko' => 30];
+    $batas = ['nama_toko' => 100, 'alamat_toko' => 200, 'telepon_toko' => 30, 'pajak' => 10];
 
     $stmt = db()->prepare(
         'INSERT INTO pengaturan (kunci, nilai) VALUES (?, ?)

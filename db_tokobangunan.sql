@@ -129,7 +129,55 @@ CREATE TABLE detail_penjualan (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================================
--- 6b. TABEL : pengaturan  (identitas toko, bisa diedit dari halaman
+-- 6b. TABEL : retur  (nota kredit / item dikembalikan ke stok)
+--    BUKAN hapus faktur -> transaksi asal tetap utuh, stok kembali naik.
+-- =====================================================================
+CREATE TABLE retur (
+  id            INT(11)      NOT NULL AUTO_INCREMENT,
+  no_faktur    VARCHAR(30)  NOT NULL,
+  tanggal       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  user_id      INT(11)      NOT NULL,
+  pelanggan_id INT(11)      NULL,
+  total_retur  DECIMAL(14,2) NOT NULL DEFAULT 0,
+  alasan       VARCHAR(255) NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_retur_faktur (no_faktur),
+  CONSTRAINT fk_retur_faktur
+    FOREIGN KEY (no_faktur) REFERENCES penjualan (no_faktur)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_retur_user
+    FOREIGN KEY (user_id) REFERENCES users (id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_retur_pelanggan
+    FOREIGN KEY (pelanggan_id) REFERENCES pelanggan (id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE retur_detail (
+  id          INT(11)      NOT NULL AUTO_INCREMENT,
+  retur_id    INT(11)      NOT NULL,
+  produk_id   INT(11)      NOT NULL,
+  jumlah      INT(11)      NOT NULL COMMENT 'qty dikembalikan',
+  harga_satuan DECIMAL(12,2) NOT NULL,
+  subtotal    DECIMAL(14,2) NOT NULL,
+  PRIMARY KEY (id),
+  KEY idx_retur_detail (retur_id),
+  KEY idx_retur_produk (produk_id),
+  CONSTRAINT fk_retur_detail_retur
+    FOREIGN KEY (retur_id) REFERENCES retur (id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT fk_retur_detail_produk
+    FOREIGN KEY (produk_id) REFERENCES produk (id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================================
+-- 6c. TABEL : pengaturan  (identitas toko, bisa diedit dari halaman
 --     Pengaturan -> dipakai di sidebar & header struk)
 -- =====================================================================
 CREATE TABLE pengaturan (
@@ -266,7 +314,8 @@ INSERT INTO produk (kode_produk, nama_produk, kategori, satuan, harga_beli, harg
 INSERT IGNORE INTO pengaturan (kunci, nilai) VALUES
 ('nama_toko',    'TOKO BANGUNAN MANDIRI'),
 ('alamat_toko',  'Jl. Raya Merdeka No. 123, Depok'),
-('telepon_toko', '(021) 555-0123');
+('telepon_toko', '(021) 555-0123'),
+('pajak',        '0.12');
 
 -- Contoh 1 transaksi penjualan (biar chart dashboard tidak kosong)
 INSERT INTO penjualan (no_faktur, tanggal, total_bayar, diskon, user_id, pelanggan_id)

@@ -83,7 +83,12 @@ try {
     }
 
     if ($diskon > $subtotal) $diskon = $subtotal;
-    $total = $subtotal - $diskon;
+    // Pajak (persentase, default 0.12 = 12%) diambil dari tabel pengaturan
+    $pajakRate = (float)db()->query("SELECT nilai FROM pengaturan WHERE kunci = 'pajak'")->fetchColumn();
+    if ($pajakRate <= 0) $pajakRate = 0.12;
+    // Pajak atas jumlah bersih (subtotal - diskon)
+    $pajak = round(($subtotal - $diskon) * $pajakRate, 2);
+    $total = ($subtotal - $diskon) + $pajak;
 
     if ($bayar > 0 && $bayar < $total) {
         throw new RuntimeException('Nominal bayar (' . number_format($bayar) . ') kurang dari total (' . number_format($total) . ').');
@@ -170,6 +175,7 @@ try {
             'pelanggan'    => $pelangganNama ?: 'Pembeli Umum',
             'subtotal'     => $subtotal,
             'diskon'       => $diskon,
+            'pajak'        => $pajak,
             'total'        => $total,
             'kembalian'    => max(0, $bayar - $total),
             'items'        => array_map(function ($r) use ($produkMap) {

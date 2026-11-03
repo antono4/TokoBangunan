@@ -5,6 +5,7 @@
  */
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+require_once __DIR__ . '/includes/config.php';
 
 $BASE = 'http://127.0.0.1:8090/api/';
 
@@ -162,6 +163,7 @@ hasil('Hasil update terbaca di list (nama + stok 180)',
 // ------------------------------------------------------------------
 echo "\n4. TRANSAKSI KASIR & TRIGGER STOK\n";
 // 1) transaksi normal, 2 jenis barang
+// subtotal 219.000 - diskon 5.000 = 214.000 ; pajak 12% = 25.680 -> total 239.680 ; bayar 250.000 -> kembali 10.320
 $t = kirim($BASE . 'penjualan_simpan.php', $adminSess, [
     'pelanggan_id' => 1,
     'diskon' => 5000,
@@ -169,15 +171,16 @@ $t = kirim($BASE . 'penjualan_simpan.php', $adminSess, [
     'items'  => [
         ['produk_id' => 1, 'jumlah' => 2],   // Semen Gresik 62.000 x2 = 124.000
         ['produk_id' => 7, 'jumlah' => 5],   // Kabel 19.000  x5 =  95.000
-    ],   // subtotal 219.000 - 5.000 = 214.000 ; bayar 250.000 -> kembali 36.000
+    ],
 ]);
 $f1   = $t['json']['faktur'] ?? [];
 $noFaktur = $f1['no_faktur'] ?? '';
 hasil('Transaksi normal disimpan + no_faktur + kembalian benar',
     $t['kode'] === 200
         && preg_match('/^TRX-\d{8}-\d{4}$/', $noFaktur) === 1
-        && abs(($f1['total'] ?? 0) - 214000) < 0.01
-        && abs(($f1['kembalian'] ?? 0) - 36000) < 0.01,
+        && abs(($f1['total'] ?? 0) - 239680) < 0.01
+        && abs(($f1['pajak'] ?? 0) - 25680) < 0.01
+        && abs(($f1['kembalian'] ?? 0) - 10320) < 0.01,
     'kode=' . $t['kode'] . ' ' . ($t['json']['message'] ?? json_encode($f1)));
 
 $p3 = getData($BASE . 'produk_list.php', $adminSess);
@@ -354,7 +357,7 @@ $kFake = kirim($BASE . 'penjualan_simpan.php', $kasirSess, [
     'items'  => [['produk_id' => 3, 'jumlah' => 1, 'harga_satuan' => 1]]]);
 $f2 = $kFake['json']['faktur'] ?? [];
 hasil('Palsukan harga di client diabaikan (server pakai harga resmi)',
-    abs(($f2['total'] ?? 0) - 1400) < 0.01,
+    abs(($f2['total'] ?? 0) - 1568) < 0.01,   // 1400 + pajak 12% (168) = 1568
     'total=' . ($f2['total'] ?? '?'));
 
 // ------------------------------------------------------------------
@@ -422,9 +425,9 @@ $bulanIni = date('Y-m-01');
 $hariIni  = date('Y-m-d');
 $lp = getData($BASE . "laporan.php?grup=harian&dari=$bulanIni&sampai=$hariIni", $adminSess);
 $r = $lp['json'];
-hasil('Laporan harian: omzet 439.400 (5 transaksi: seed+test), baris >= 1',
+hasil('Laporan harian: omzet 477.248 (5 transaksi: seed+test, pajak 12%), baris >= 1',
     $r['ok'] === true
-        && abs($r['ringkasan']['omzet'] - 439400) < 0.01
+        && abs($r['ringkasan']['omzet'] - 477248) < 0.01
         && $r['ringkasan']['transaksi'] === 5
         && count($r['rincian']) >= 1,
     json_encode($r['ringkasan'] ?? []));
@@ -458,6 +461,29 @@ hasil('Laporan laba kotor: ok + laba kotor numerik',
 // laporan laba kotor tanpa login -> 401
 $lbn = getData($BASE . 'laporan_laba.php?grup=harian');
 hasil('Laporan laba kotor tanpa login -> 401', $lbn['kode'] === 401);
+
+// retur / nota kredit: stok masuk kembali (ambil 1 transaksi terbaru)
+$pdoT = db();
+$trxTerbaru = $pdoT->query(
+    "SELECT p.no_faktur AS no_faktur, d.produk_id AS produk_id, d.jumlah AS jumlah
+       FROM penjualan p
+       JOIN detail_penjualan d ON d.penjualan_id = p.id
+      ORDER BY p.id DESC
+      LIMIT 1"
+)->fetch();
+$rtNoFaktur = (string)$trxTerbaru['no_faktur'];
+$rtProdukId = (int)$trxTerbaru['produk_id'];
+$rtQty     = (int)$trxTerbaru['jumlah'];
+$rt = kirim($BASE . 'retur_simpan.php', $adminSess,
+    ['no_faktur' => $rtNoFaktur, 'items' => [['produk_id' => $rtProdukId, 'jumlah' => $rtQty]]]);
+hasil('Retur: nota kredit tersimpan + stok masuk kembali', $rt['kode'] === 200, json_encode($rt['json']));
+
+$rtG = getData($BASE . 'retur_simpan.php');
+hasil('Retur tanpa login -> 401', $rtG['kode'] === 401);
+
+$rtF = kirim($BASE . 'retur_simpan.php', $adminSess,
+    ['no_faktur' => 'TRX-TIDAK-ADA-9999', 'items' => [['produk_id' => 3, 'jumlah' => 1]]]);
+hasil('Retur: faktur tidak ada -> ditolak', $rtF['kode'] === 422, json_encode($rtF['json']));
 
 // export CSV detail (admin): BOM + judul + header
 $ch = curl_init($BASE . "laporan_export.php?type=detail&dari=$bulanIni&sampai=$hariIni");
