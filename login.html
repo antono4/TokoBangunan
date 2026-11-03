@@ -175,7 +175,9 @@
             <label class="form-label">Username</label>
             <div class="input-group">
               <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
-              <input type="text" class="form-control" id="username" required autocomplete="username" autofocus>
+              <input type="text" class="form-control" id="username" required autocomplete="username" autofocus
+                     pattern="[a-zA-Z0-9._-]{3,50}"
+                     title="Username 3-50 karakter: huruf, angka, titik, garis bawah, dan minus.">
             </div>
           </div>
           <div class="mb-4">
@@ -243,6 +245,25 @@ async function doLogin(e) {
   e.preventDefault();
   const alertBox = document.getElementById('alert-login');
   const btn      = document.getElementById('btn-login');
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+
+  // Validasi sisi klien (sinkron dengan server)
+  if (username === '' || password === '') {
+    alertBox.textContent = 'Username dan password wajib diisi.';
+    alertBox.classList.remove('d-none');
+    return;
+  }
+  if (username.length < 3 || username.length > 50) {
+    alertBox.textContent = 'Username harus 3-50 karakter.';
+    alertBox.classList.remove('d-none');
+    return;
+  }
+  if (!/^[a-zA-Z0-9._-]+$/.test(username)) {
+    alertBox.textContent = 'Username hanya boleh huruf, angka, titik, garis bawah, dan minus.';
+    alertBox.classList.remove('d-none');
+    return;
+  }
 
   alertBox.classList.add('d-none');
   btn.disabled = true;

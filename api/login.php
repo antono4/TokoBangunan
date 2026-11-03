@@ -17,6 +17,14 @@ if ($username === '' || $password === '') {
     json_out(['ok' => false, 'message' => 'Username dan password wajib diisi.'], 422);
 }
 
+// Validasi format username: 3-50 karakter, huruf/angka/titik/garis bawah/minus
+if (strlen($username) < 3 || strlen($username) > 50) {
+    json_out(['ok' => false, 'message' => 'Username harus 3-50 karakter.'], 422);
+}
+if (!preg_match('/^[a-zA-Z0-9._-]+$/', $username)) {
+    json_out(['ok' => false, 'message' => 'Username hanya boleh huruf, angka, titik, garis bawah, dan minus.'], 422);
+}
+
 try {
     $stmt = db()->prepare('SELECT id, username, password, nama_lengkap, role FROM users WHERE username = ? LIMIT 1');
     $stmt->execute([$username]);
