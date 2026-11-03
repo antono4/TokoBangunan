@@ -9,71 +9,227 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
 <!-- Font AdminLTE (Source Sans 3) -->
 <link href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" rel="stylesheet">
-<!-- AdminLTE v4 (sudah mencakup Bootstrap 5, termasuk gaya .login-page/.login-box) -->
+<!-- AdminLTE v4 (sudah mencakup Bootstrap 5) -->
 <link href="https://cdn.jsdelivr.net/npm/admin-lte@4.10.0/dist/css/adminlte.min.css" rel="stylesheet">
 
 <style>
-  .login-logo .brand-text { font-weight: 800; letter-spacing: .5px; color: #1b2431; }
-  .login-logo i { color: #e6a800; font-size: 3.2rem; }
+  /* ================= SPLIT-SCREEN LOGIN ================= */
+  .login-wrap {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* Panel kiri: gambar */
+  .login-image {
+    position: relative;
+    flex: 0 0 44%;
+    min-height: 100vh;
+    display: none; /* sembunyi di HP, tampil di desktop */
+  }
+  @media (min-width: 768px) {
+    .login-image { display: flex; }
+  }
+  .login-image .login-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  .login-image .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(27,36,49,.72) 0%, rgba(13,110,253,.45) 100%);
+  }
+  .login-image .brand-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: #fff;
+    padding: 2rem;
+    width: 100%;
+  }
+  .login-image .brand-content i {
+    font-size: 3.5rem;
+    color: #ffc107;
+    margin-bottom: 1rem;
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.4));
+  }
+  .login-image .brand-content h2 {
+    font-weight: 800;
+    letter-spacing: .5px;
+    font-size: 2.1rem;
+    margin: 0 0 .5rem;
+  }
+  .login-image .brand-content p {
+    margin: 0;
+    opacity: .95;
+    font-size: 1.05rem;
+  }
+  .login-image .brand-content .tagline {
+    margin-top: .75rem;
+    font-size: .9rem;
+    opacity: .85;
+    max-width: 260px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+  }
+
+  /* Panel kanan: form login */
+  .login-form-panel {
+    flex: 1 1 56%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 420px;
+    border: none;
+    border-radius: 1.25rem;
+    box-shadow: 0 20px 50px rgba(0,0,0,.18);
+    /* Efek Glassmorphism */
+    background: rgba(255,255,255,.82);
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    border: 1px solid rgba(255,255,255,.65);
+  }
+  .login-card .card-body {
+    padding: 2rem 1.75rem;
+  }
+
+  /* Panel kanan juga dapat sentuhan kaca lembut */
+  .login-form-panel {
+    flex: 1 1 56%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    background: rgba(255,255,255,.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .login-card .login-header {
+    text-align: center;
+    margin-bottom: 1.75rem;
+  }
+  .login-card .login-header i {
+    color: #e6a800;
+    font-size: 2.6rem;
+    margin-bottom: .75rem;
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.25));
+  }
+  .login-card .login-header h3 {
+    font-weight: 800;
+    letter-spacing: .5px;
+    color: #1b2431;
+    margin: 0 0 .5rem;
+  }
+  .login-card .login-header p {
+    margin: 0;
+    color: #6c757d;
+    font-size: .95rem;
+  }
+
   .kartu-demo {
     font-size: .82rem;
     background: #f8f9fa;
     border: 1px dashed #adb5bd;
     border-radius: .5rem;
+    padding: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  /* Responsive: HP -> susun vertikal (gambar di atas, form di bawah) */
+  @media (max-width: 767.98px) {
+    .login-wrap { flex-direction: column; }
+    .login-image {
+      display: block;
+      flex: 0 0 auto;
+      min-height: auto;
+      height: 30vh;
+      min-height: 220px;
+    }
+    .login-image .brand-content { padding: 1rem; }
+    .login-image .brand-content h2 { font-size: 1.5rem; }
+    .login-image .brand-content i { font-size: 2.2rem; }
+    .login-form-panel { flex: 1; padding: 1.5rem 1rem; }
   }
 </style>
 </head>
 <body class="login-page bg-body-tertiary">
 
-<div class="login-box">
-  <div class="login-logo text-center mb-4">
-    <div>
+<div class="login-wrap">
+
+  <!-- ============ KIRI: GAMBAR ============ -->
+  <div class="login-image">
+    <img
+      src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1200&auto=format&fit=crop&q=80&ixlib=rb-4.0.3"
+      alt="Gudang material bangunan"
+      class="login-img"
+    >
+    <div class="overlay"></div>
+    <div class="brand-content">
       <i class="bi bi-hammer"></i>
-      <h3 class="brand-text mb-0 mt-2" id="brand-nama">TOKO BANGUNAN</h3>
-      <p class="text-secondary small mb-0">Aplikasi Penjualan &amp; Kasir</p>
+      <h2 class="fw-bold mb-2" id="brand-nama-img">TOKO BANGUNAN</h2>
+      <p class="mb-0 opacity-90">Aplikasi Penjualan &amp; Kasir</p>
+      <p class="tagline">Kelola transaksi, stok, pelanggan, dan laporan penjualan dari satu tempat.</p>
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-body login-card-body p-4 p-md-5">
+  <!-- ============ KANAN: FORM LOGIN ============ -->
+  <div class="login-form-panel">
+    <div class="card login-card">
+      <div class="card-body p-4 p-md-5">
 
-    <div id="alert-login" class="alert alert-danger py-2 small d-none" role="alert"></div>
-    <div id="banner-diagnostik" class="alert alert-warning py-2 small d-none" role="alert">
-      <b><i class="bi bi-buildings-fill me-1"></i>Perlu Perbaikan Backend</b>
-      <ol class="ps-3 mb-1 mt-1" id="daftar-kendala"></ol>
-      <div class="text-secondary">Setelah diperbaiki, muat ulang halaman ini.</div>
-    </div>
-
-    <form id="form-login" onsubmit="doLogin(event)">
-      <div class="mb-3">
-        <label class="form-label">Username</label>
-        <div class="input-group">
-          <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
-          <input type="text" class="form-control" id="username" required autocomplete="username" autofocus>
+        <div class="login-header">
+          <i class="bi bi-box-arrow-in-right"></i>
+          <h3 class="fw-bold mb-0" id="brand-nama">TOKO BANGUNAN</h3>
+          <p>Masuk ke akun admin atau kasir</p>
         </div>
-      </div>
-      <div class="mb-4">
-        <label class="form-label">Password</label>
-        <div class="input-group">
-          <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
-          <input type="password" class="form-control" id="password" required autocomplete="current-password">
-          <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
-            <i class="bi bi-eye" id="eye-icon"></i>
+
+        <div id="alert-login" class="alert alert-danger py-2 small d-none" role="alert"></div>
+        <div id="banner-diagnostik" class="alert alert-warning py-2 small d-none" role="alert">
+          <b><i class="bi bi-buildings-fill me-1"></i>Perlu Perbaikan Backend</b>
+          <ol class="ps-3 mb-1 mt-1" id="daftar-kendala"></ol>
+          <div class="text-secondary">Setelah diperbaiki, muat ulang halaman ini.</div>
+        </div>
+
+        <form id="form-login" onsubmit="doLogin(event)">
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
+              <input type="text" class="form-control" id="username" required autocomplete="username" autofocus>
+            </div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
+              <input type="password" class="form-control" id="password" required autocomplete="current-password">
+              <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+                <i class="bi bi-eye" id="eye-icon"></i>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 btn-lg fw-bold" id="btn-login">
+            <span id="btn-text"><i class="bi bi-box-arrow-in-right me-2"></i>Login</span>
           </button>
-        </div>
-      </div>
-      <button type="submit" class="btn btn-primary w-100 btn-lg fw-bold" id="btn-login">
-        <span id="btn-text"><i class="bi bi-box-arrow-in-right me-2"></i>Login</span>
-      </button>
-    </form>
+        </form>
 
-    <div class="kartu-demo mt-4 p-3">
-      <b><i class="bi bi-info-circle me-1"></i>Akun demo</b><br>
-      Admin: <code>admin</code> / <code>admin123</code><br>
-      Kasir: <code>kasir1</code> / <code>kasir123</code>
-    </div>
+      </div>
     </div>
   </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
@@ -83,7 +239,11 @@
 fetch('api/pengaturan.php')
   .then(r => r.json())
   .then(j => {
-    if (j.ok) document.getElementById('brand-nama').textContent = j.pengaturan.nama_toko;
+    if (j.ok) {
+      const nama = j.pengaturan.nama_toko;
+      document.getElementById('brand-nama').textContent     = nama;
+      document.getElementById('brand-nama-img').textContent = nama;
+    }
   })
   .catch(() => {});
 
