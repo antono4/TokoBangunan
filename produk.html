@@ -236,12 +236,12 @@
 
             <div class="col-md-4">
               <label class="form-label">Harga Beli (Rp) <span class="text-danger">*</span></label>
-              <input type="number" class="form-control" id="harga_beli" required min="0" step="500">
+              <input type="number" class="form-control" id="harga_beli" required min="0" step="100">
             </div>
 
             <div class="col-md-4">
               <label class="form-label">Harga Jual (Rp) <span class="text-danger">*</span></label>
-              <input type="number" class="form-control" id="harga_jual" required min="0" step="500">
+              <input type="number" class="form-control" id="harga_jual" required min="0" step="100">
             </div>
 
             <div class="col-md-4">
@@ -417,6 +417,7 @@ function bukaModalTambah() {
   kosongkanForm();
   document.getElementById('judul-modal').innerHTML =
     '<i class="bi bi-plus-circle me-2"></i>Tambah Produk';
+  modalProduk.show();
   setTimeout(() => document.getElementById('kode_produk').focus(), 300);
 }
 
@@ -437,6 +438,8 @@ function bukaModalEdit(id) {
 
   document.getElementById('judul-modal').innerHTML =
     `<i class="bi bi-pencil-square me-2"></i>Edit Produk: ${p.nama_produk}`;
+
+  modalProduk.show();
 }
 
 async function simpanProduk(e) {
