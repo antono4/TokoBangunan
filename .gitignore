@@ -1,0 +1,10 @@
+# Aplikasi Toko Bangunan
+# File sementara / debug
+*.log
+*.out
+debug_sess.*
+*.tmp
+
+# OS
+Thumbs.db
+.DS_Store

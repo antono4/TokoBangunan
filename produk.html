@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manajemen Produk - Toko Bangunan</title>
+
+<!-- Bootstrap 5 -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+<style>
+  :root {
+    --sidebar-w: 260px;
+    --brand: #0d6efd;
+    --dark: #1b2431;
+  }
+
+  body { background-color: #f4f6f9; font-family: "Segoe UI", system-ui, sans-serif; }
+
+  /* ================= SIDEBAR (identik antar halaman) ================= */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: linear-gradient(180deg, var(--dark) 0%, #2c3a4f 100%);
+    color: #cbd3e1;
+  }
+  .sidebar .brand { font-weight: 700; color: #fff; letter-spacing: .5px; }
+  .sidebar .brand i { color: #ffcc00; }
+  .sidebar .nav-link {
+    color: #aebacf; padding: .7rem 1rem; border-radius: .5rem;
+    margin: .15rem .6rem; transition: all .2s;
+  }
+  .sidebar .nav-link:hover { background: rgba(255,255,255,.08); color: #fff; }
+  .sidebar .nav-link.active {
+    background: var(--brand); color: #fff;
+    box-shadow: 0 4px 10px rgba(13,110,253,.4);
+  }
+  @media (min-width: 992px) {
+    .sidebar { min-height: 100vh; position: sticky; top: 0; flex-shrink: 0; }
+    .page-wrap { margin-left: var(--sidebar-w); }
+  }
+
+  .card { border: none; border-radius: .9rem; box-shadow: 0 2px 12px rgba(20,30,50,.07); }
+  .card .card-title i { color: var(--brand); }
+
+  table tbody td { vertical-align: middle; }
+
+  /* Badge satuan agar satuan variasi terlihat menonjol */
+  .badge-satuan { background-color: #e9ecef; color: #495057; font-size: .72rem; }
+
+  .btn-icon { padding: .25rem .5rem; }
+</style>
+</head>
+<body>
+
+<div class="d-flex">
+
+  <!-- ============ SIDEBAR ============ -->
+  <nav class="sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="sidebar">
+    <div class="offcanvas-header d-lg-none">
+      <h5 class="offcanvas-title text-white">Menu</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#sidebar"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column p-3">
+      <a href="dashboard.html" class="brand text-decoration-none d-flex align-items-center gap-2 px-2 py-3 mb-2 fs-5">
+        <i class="bi bi-hammer"></i> <span id="brand-nama">TOKO BANGUNAN</span>
+      </a>
+      <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+          <a href="dashboard.html" class="nav-link"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a href="kasir.html" class="nav-link"><i class="bi bi-cash-coin me-2"></i>Transaksi Kasir</a>
+        </li>
+        <li class="nav-item">
+          <a href="produk.html" class="nav-link active"><i class="bi bi-box-seam me-2"></i>Manajemen Produk</a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link"><i class="bi bi-people me-2"></i>Pelanggan &amp; Supplier</a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link"><i class="bi bi-graph-up-arrow me-2"></i>Laporan Penjualan</a>
+        </li>
+        <li class="nav-item" id="menu-pengaturan">
+          <a href="pengaturan.html" class="nav-link"><i class="bi bi-gear me-2"></i>Pengaturan &amp; User</a>
+        </li>
+      </ul>
+      <hr class="text-secondary">
+      <div class="d-flex align-items-center px-2">
+        <i class="bi bi-person-circle fs-3 me-2"></i>
+        <div class="small">
+          <div class="text-white fw-semibold" id="user-nama">...</div>
+          <div class="text-secondary" id="user-username">...</div>
+        </div>
+      </div>
+      <button class="btn btn-outline-light btn-sm mt-3" onclick="logout()">
+        <i class="bi bi-box-arrow-left me-1"></i>Logout
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============ KONTEN UTAMA ============ -->
+  <main class="page-wrap flex-grow-1">
+
+    <div class="bg-white border-bottom px-3 px-sm-4 py-3 d-flex align-items-center gap-2 sticky-top">
+      <button class="btn btn-outline-secondary btn-sm d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar">
+        <i class="bi bi-list"></i>
+      </button>
+      <h4 class="mb-0 fw-bold"><i class="bi bi-box-seam me-2 text-primary"></i>Manajemen Produk</h4>
+    </div>
+
+    <div class="p-3 p-sm-4">
+
+      <!-- Toolbar: cari + filter kategori + tombol tambah -->
+      <div class="card mb-3">
+        <div class="card-body d-flex flex-wrap align-items-center gap-2">
+          <div class="input-group" style="max-width: 320px;">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control" id="cari-produk" placeholder="Cari kode / nama produk...">
+          </div>
+          <select class="form-select w-auto" id="filter-kategori">
+            <option value="">Semua Kategori</option>
+          </select>
+          <button class="btn btn-primary ms-auto" data-bs-toggle="modal" data-bs-target="#modalProduk"
+                  onclick="bukaModalTambah()">
+            <i class="bi bi-plus-circle me-1"></i>Tambah Produk
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabel produk -->
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-4">Kode</th>
+                <th>Nama Produk</th>
+                <th>Kategori</th>
+                <th>Satuan</th>
+                <th class="text-end">Harga Beli</th>
+                <th class="text-end">Harga Jual</th>
+                <th class="text-center">Stok</th>
+                <th>Supplier</th>
+                <th class="text-center" style="width: 12%;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="isi-tabel">
+              <tr><td colspan="9" class="text-center text-secondary py-5">
+                <span class="spinner-border me-2"></span>Memuat data produk...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="text-secondary small mt-2">
+        Menampilkan <span id="jumlah-tampil">0</span> dari <span id="jumlah-total">0</span> produk.
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ MODAL TAMBAH / EDIT PRODUK ============ -->
+<div class="modal fade" id="modalProduk" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="judul-modal"><i class="bi bi-plus-circle me-2"></i>Tambah Produk</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-produk" onsubmit="simpanProduk(event)">
+          <input type="hidden" id="produk-id">
+          <div class="row g-3">
+
+            <div class="col-md-4">
+              <label class="form-label">Kode Produk <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="kode_produk" required placeholder="PRD-011">
+            </div>
+
+            <div class="col-md-8">
+              <label class="form-label">Nama Produk <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="nama_produk" required
+                     placeholder="Contoh: Semen Gresik 50kg">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Kategori</label>
+              <input type="text" class="form-control" id="kategori" list="daftar-kategori"
+                     placeholder="Semen / Besi / Cat...">
+              <datalist id="daftar-kategori"></datalist>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Satuan <span class="text-danger">*</span></label>
+              <select class="form-select" id="satuan" required>
+                <option value="sak">sak (semen)</option>
+                <option value="pcs">pcs (bata, cat kaleng)</option>
+                <option value="batang">batang (besi, pipa)</option>
+                <option value="meter">meter (kabel, pipa)</option>
+                <option value="dus">dus (cat, genteng)</option>
+                <option value="kg">kg (paku, simen purut)</option>
+                <option value="liter">liter (sika, pelapis)</option>
+                <option value="roll">roll (plastik udara, aspal)</option>
+                <option value="m2">m2 (keramik, plafon)</option>
+                <option value="m3">m3 (pasir, batu split)</option>
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Supplier</label>
+              <select class="form-select" id="supplier_id">
+                <option value="">&mdash; Pilih Supplier &mdash;</option>
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Harga Beli (Rp) <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="harga_beli" required min="0" step="500">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Harga Jual (Rp) <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="harga_jual" required min="0" step="500">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Stok <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="stok" required min="0" step="1">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Stok Minimum</label>
+              <input type="number" class="form-control" id="stok_minimum" value="10" min="0" step="1">
+              <div class="form-text">Batas alert &ldquo;stok menipis&rdquo;.</div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="submit" form="form-produk" class="btn btn-primary" id="btn-simpan">
+          <i class="bi bi-save me-1"></i>Simpan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* =====================================================================
+   Data & operasi CRUD mengarah ke backend:
+   - api/produk_list.php   : GET  (baca)
+   - api/produk_simpan.php : POST (insert / update, admin saja)
+   - api/produk_hapus.php  : POST (delete, admin saja)
+   ===================================================================== */
+
+const rp = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+
+let dataProduk   = [];
+let dataSupplier = [];
+let modalProduk  = null;
+
+async function logout() {
+  await fetch('api/logout.php');
+  location.href = 'login.html';
+}
+
+// ================= PENGATURAN TOKO (brand sidebar) =================
+let pengaturanToko = { nama_toko: 'TOKO BANGUNAN MANDIRI',
+                       alamat_toko: 'Jl. Raya Merdeka No. 123, Depok',
+                       telepon_toko: '(021) 555-0123' };
+
+async function muatPengaturan(user) {
+  try {
+    const res = await fetch('api/pengaturan.php');
+    if (res.ok) {
+      const json = await res.json();
+      if (json.ok) {
+        pengaturanToko = json.pengaturan;
+        document.getElementById('brand-nama').textContent = pengaturanToko.nama_toko;
+      }
+    }
+  } catch (e) { /* offline: pakai default */ }
+  if (user && user.role !== 'admin') {
+    document.getElementById('menu-pengaturan')?.closest('li').classList.add('d-none');
+  }
+}
+
+// ================= MUAT DATA =================
+async function cekSession() {
+  const res = await fetch('api/me.php');
+  if (!res.ok) { location.href = 'login.html'; return null; }
+  const { user } = await res.json();
+  document.getElementById('user-nama').textContent     = user.nama || user.username;
+  document.getElementById('user-username').textContent = user.role.toUpperCase() + ' \u2014 ' + user.username;
+  return user;
+}
+
+async function muatProduk() {
+  const res = await fetch('api/produk_list.php');
+  if (res.status === 401) { location.href = 'login.html'; return; }
+  const json = await res.json();
+  if (!json.ok) return;
+
+  dataProduk   = json.produk;
+  dataSupplier = json.supplier;
+
+  // dropdown supplier di form
+  document.getElementById('supplier_id').innerHTML =
+    '<option value="">&mdash; Pilih Supplier &mdash;</option>' +
+    dataSupplier.map(s => `<option value="${s.id}">${s.nama_supplier}</option>`).join('');
+
+  isiFilterKategori();
+  renderTabel();
+}
+
+function isiFilterKategori() {
+  const list = [...new Set(dataProduk.map(p => p.kategori || ''))].filter(Boolean).sort();
+  const filterSel = document.getElementById('filter-kategori');
+  const nilaiLama = filterSel.value;
+  filterSel.innerHTML =
+    '<option value="">Semua Kategori</option>' +
+    list.map(k => `<option value="${k}">${k}</option>`).join('');
+  filterSel.value = nilaiLama;
+
+  document.getElementById('daftar-kategori').innerHTML =
+    list.map(k => `<option value="${k}">${k}</option>`).join('');
+}
+
+// ================= RENDER TABEL (filter di sisi klien) =================
+function renderTabel() {
+  const cari     = document.getElementById('cari-produk').value.trim().toLowerCase();
+  const kategori = document.getElementById('filter-kategori').value;
+
+  const hasil = dataProduk.filter(p =>
+    (!kategori || p.kategori === kategori) &&
+    (!cari || p.kode_produk.toLowerCase().includes(cari) || p.nama_produk.toLowerCase().includes(cari))
+  );
+
+  const tbody = document.getElementById('isi-tabel');
+
+  if (hasil.length === 0) {
+    tbody.innerHTML = `
+      <tr><td colspan="9" class="text-center text-secondary py-5">
+        <i class="bi bi-inbox fs-1 d-block mb-2"></i>Tidak ada produk yang cocok.
+      </td></tr>`;
+  } else {
+    tbody.innerHTML = hasil.map(p => `
+      <tr>
+        <td class="ps-4"><span class="fw-semibold">${p.kode_produk}</span></td>
+        <td>${p.nama_produk}</td>
+        <td><span class="badge bg-secondary-subtle text-secondary-emphasis">${p.kategori || '-'}</span></td>
+        <td><span class="badge badge-satuan">${p.satuan}</span></td>
+        <td class="text-end">${rp(p.harga_beli)}</td>
+        <td class="text-end fw-semibold">${rp(p.harga_jual)}</td>
+        <td class="text-center">
+          ${p.stok < 10
+            ? `<span class="badge bg-danger">${p.stok}</span><div class="small text-danger">menipis</div>`
+            : (p.stok < p.stok_minimum * 2
+                ? `<span class="badge bg-warning text-dark">${p.stok}</span>`
+                : `<span class="badge bg-success-subtle text-success-emphasis">${p.stok}</span>`)}
+        </td>
+        <td class="small">${p.nama_supplier || '-'}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-outline-primary btn-icon" title="Edit" onclick="bukaModalEdit(${p.id})">
+            <i class="bi bi-pencil-square"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger btn-icon" title="Hapus" onclick="hapusProduk(${p.id})">
+            <i class="bi bi-trash3"></i>
+          </button>
+        </td>
+      </tr>`).join('');
+  }
+
+  document.getElementById('jumlah-tampil').textContent = hasil.length;
+  document.getElementById('jumlah-total').textContent = dataProduk.length;
+}
+
+// ================= TAMBAH / EDIT =================
+function kosongkanForm() {
+  document.getElementById('produk-id').value = '';
+  document.getElementById('kode_produk').value = '';
+  document.getElementById('nama_produk').value = '';
+  document.getElementById('kategori').value = '';
+  document.getElementById('satuan').value = 'sak';
+  document.getElementById('supplier_id').value = '';
+  document.getElementById('harga_beli').value = '';
+  document.getElementById('harga_jual').value = '';
+  document.getElementById('stok').value = 0;
+  document.getElementById('stok_minimum').value = 10;
+}
+
+function bukaModalTambah() {
+  kosongkanForm();
+  document.getElementById('judul-modal').innerHTML =
+    '<i class="bi bi-plus-circle me-2"></i>Tambah Produk';
+  setTimeout(() => document.getElementById('kode_produk').focus(), 300);
+}
+
+function bukaModalEdit(id) {
+  const p = dataProduk.find(x => x.id === id);
+  if (!p) return;
+
+  document.getElementById('produk-id').value      = p.id;
+  document.getElementById('kode_produk').value    = p.kode_produk;
+  document.getElementById('nama_produk').value    = p.nama_produk;
+  document.getElementById('kategori').value       = p.kategori || '';
+  document.getElementById('satuan').value         = p.satuan;
+  document.getElementById('supplier_id').value    = p.supplier_id || '';
+  document.getElementById('harga_beli').value     = p.harga_beli;
+  document.getElementById('harga_jual').value     = p.harga_jual;
+  document.getElementById('stok').value           = p.stok;
+  document.getElementById('stok_minimum').value   = p.stok_minimum;
+
+  document.getElementById('judul-modal').innerHTML =
+    `<i class="bi bi-pencil-square me-2"></i>Edit Produk: ${p.nama_produk}`;
+}
+
+async function simpanProduk(e) {
+  e.preventDefault();
+
+  const data = {
+    id:           document.getElementById('produk-id').value,
+    kode_produk:  document.getElementById('kode_produk').value.trim(),
+    nama_produk:  document.getElementById('nama_produk').value.trim(),
+    kategori:     document.getElementById('kategori').value.trim(),
+    satuan:       document.getElementById('satuan').value,
+    supplier_id:  document.getElementById('supplier_id').value || null,
+    harga_beli:   parseFloat(document.getElementById('harga_beli').value) || 0,
+    harga_jual:   parseFloat(document.getElementById('harga_jual').value) || 0,
+    stok:         parseInt(document.getElementById('stok').value) || 0,
+    stok_minimum: parseInt(document.getElementById('stok_minimum').value) || 10
+  };
+
+  if (data.harga_jual < data.harga_beli) {
+    if (!confirm('Harga jual lebih kecil dari harga beli. Tetap simpan?')) return;
+  }
+
+  const btn = document.getElementById('btn-simpan');
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('api/produk_simpan.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (res.status === 401) { location.href = 'login.html'; return; }
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert(json.message || 'Gagal menyimpan produk.');
+      return;
+    }
+
+    modalProduk.hide();
+    await muatProduk();   // muat ulang data terbaru dari server
+  } catch (err) {
+    alert('Tidak dapat terhubung ke server: ' + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function hapusProduk(id) {
+  const p = dataProduk.find(x => x.id === id);
+  if (!p) return;
+
+  if (!confirm(`Yakin hapus produk "${p.nama_produk}" (${p.kode_produk})?`)) return;
+
+  try {
+    const res = await fetch('api/produk_hapus.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+
+    if (res.status === 401) { location.href = 'login.html'; return; }
+    const json = await res.json();
+
+    if (!json.ok) { alert(json.message || 'Produk tidak dapat dihapus.'); return; }
+
+    await muatProduk();
+  } catch (err) {
+    alert('Tidak dapat terhubung ke server: ' + err.message);
+  }
+}
+
+// ================= INISIALISASI =================
+(async () => {
+  const u = await cekSession();
+  if (u === null) return;
+  await muatPengaturan(u);
+  modalProduk = new bootstrap.Modal('#modalProduk');
+  document.getElementById('cari-produk').addEventListener('input', renderTabel);
+  document.getElementById('filter-kategori').addEventListener('change', renderTabel);
+  await muatProduk();
+})();
+</script>
+</body>
+</html>
