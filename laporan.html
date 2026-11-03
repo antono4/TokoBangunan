@@ -26,6 +26,7 @@
   .bg-s2 { background: linear-gradient(135deg, #0d6efd, #3f8cff); }
   .bg-s3 { background: linear-gradient(135deg, #fd7e14, #ffb567); }
   .bg-s4 { background: linear-gradient(135deg, #6f42c1, #a67cf0); }
+  .bg-s5 { background: linear-gradient(135deg, #343a40, #6c757d); }
 
   /* Brand sidebar */
   .sidebar-brand .brand-link .brand-text { color: #fff; font-weight: 600; }
@@ -204,6 +205,15 @@
             </div>
           </div>
         </div>
+        <div class="col-sm-6 col-xl-3">
+          <div class="card summary-card bg-s5">
+            <div class="card-body">
+              <small><i class="bi bi-calculator me-1"></i>LABA KOTOR</small>
+              <h4 id="ringkasan-laba">Rp 0</h4>
+              <small class="text-secondary">Omzet - Harga Beli</small>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ===== GRAFIK OMZET + TERLARIS ===== -->
@@ -335,6 +345,18 @@ async function muatLaporan() {
     document.getElementById('ringkasan-transaksi').textContent = ringkasan.transactions ?? ringkasan.transaksi;
     document.getElementById('ringkasan-item').textContent      = ringkasan.item_terjual.toLocaleString('id-ID');
     document.getElementById('ringkasan-diskon').textContent    = rp(ringkasan.total_diskon);
+
+    // ---- Kartu laba kotor (omzet - harga beli) ----
+    try {
+      const resLaba = await fetch(`api/laporan_laba.php?grup=${f.grup}&dari=${f.dari}&sampai=${f.sampai}`);
+      if (resLaba.status === 401) { location.href = 'login.html'; return; }
+      const jsonLaba = await resLaba.json();
+      if (jsonLaba.ok) {
+        document.getElementById('ringkasan-laba').textContent = rp(jsonLaba.ringkasan?.laba_kotor ?? 0);
+      }
+    } catch (e) { /* laba kotor bersifat tambahan, abaikan kegagalan */
+      console.warn('Laba kotor gagal dimuat: ' + e.message);
+    }
 
     // ---- Judul grup ----
     const labelGrup = filter.grup === 'bulanan' ? 'Bulan' : 'Hari';

@@ -446,6 +446,19 @@ hasil('Laporan bulanan: grup periode format YYYY-MM',
 $lpNo = getData($BASE . "laporan.php?grup=harian");
 hasil('Laporan tanpa login -> 401', $lpNo['kode'] === 401);
 
+// laporan laba kotor (omzet - harga beli): butuh login + data numerik
+$lbl = getData($BASE . "laporan_laba.php?grup=harian&dari=$bulanIni&sampai=$hariIni", $adminSess);
+$lbj = $lbl['json'];
+hasil('Laporan laba kotor: ok + laba kotor numerik',
+    $lbl['kode'] === 200 && ($lbj['ok'] ?? null) === true
+        && isset($lbj['ringkasan']['laba_kotor'])
+        && is_numeric($lbj['ringkasan']['laba_kotor']),
+    'kode=' . $lbl['kode'] . ' ringkasan=' . json_encode($lbj['ringkasan'] ?? []));
+
+// laporan laba kotor tanpa login -> 401
+$lbn = getData($BASE . 'laporan_laba.php?grup=harian');
+hasil('Laporan laba kotor tanpa login -> 401', $lbn['kode'] === 401);
+
 // export CSV detail (admin): BOM + judul + header
 $ch = curl_init($BASE . "laporan_export.php?type=detail&dari=$bulanIni&sampai=$hariIni");
 curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_COOKIEFILE => $adminSess]);
