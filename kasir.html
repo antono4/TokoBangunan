@@ -5,44 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Transaksi Kasir (POS) - Toko Bangunan</title>
 
-<!-- Bootstrap 5 -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+<!-- Font AdminLTE (Source Sans 3) -->
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" rel="stylesheet">
+<!-- AdminLTE v4 (sudah mencakup Bootstrap 5) -->
+<link href="https://cdn.jsdelivr.net/npm/admin-lte@4.10.0/dist/css/adminlte.min.css" rel="stylesheet">
 
 <style>
-  :root {
-    --sidebar-w: 260px;
-    --brand: #0d6efd;
-    --dark: #1b2431;
-  }
-
-  body { background-color: #f4f6f9; font-family: "Segoe UI", system-ui, sans-serif; }
-
-  /* ================= SIDEBAR (identik antar halaman) ================= */
-  .sidebar {
-    width: var(--sidebar-w);
-    background: linear-gradient(180deg, var(--dark) 0%, #2c3a4f 100%);
-    color: #cbd3e1;
-  }
-  .sidebar .brand { font-weight: 700; color: #fff; letter-spacing: .5px; }
-  .sidebar .brand i { color: #ffcc00; }
-  .sidebar .nav-link {
-    color: #aebacf; padding: .7rem 1rem; border-radius: .5rem;
-    margin: .15rem .6rem; transition: all .2s;
-  }
-  .sidebar .nav-link:hover { background: rgba(255,255,255,.08); color: #fff; }
-  .sidebar .nav-link.active {
-    background: var(--brand); color: #fff;
-    box-shadow: 0 4px 10px rgba(13,110,253,.4);
-  }
-  @media (min-width: 992px) {
-    .sidebar { min-height: 100vh; position: sticky; top: 0; flex-shrink: 0; }
-    .page-wrap { margin-left: var(--sidebar-w); }
-  }
-
-  .card { border: none; border-radius: .9rem; box-shadow: 0 2px 12px rgba(20,30,50,.07); }
-  .card .card-title i { color: var(--brand); }
+  .card .card-title i { color: #0d6efd; }
 
   /* Highlight baris keranjang yang baru ditambahkan */
   @keyframes flashRow { from { background-color: #fff3cd; } to { background-color: transparent; } }
@@ -52,11 +23,14 @@
   .panel-bayar { background: #fff; }
   .panel-bayar .grand-total { font-size: 1.6rem; font-weight: 800; color: #198754; }
 
-  /* ================= STRUK (cetak) ================= */
+  /* ================= STRUK (cetak thermal) ================= */
   #area-struk { display: none; }
 
+  /* ================= FAKTUR A4 (khusus pelanggan kontraktor) ================= */
+  #area-faktur { display: none; }
+
   @media print {
-    /* Saat mencetak struk, sembunyikan segalanya kecuali struk */
+    /* Default: cetak STRUK thermal, sembunyikan segala hal lain */
     body * { visibility: hidden; }
     #area-struk, #area-struk * { visibility: visible; }
     #area-struk {
@@ -69,6 +43,24 @@
       color: #000;
       white-space: pre-wrap;
     }
+
+    /* Mode FAKTUR: body.mode-faktur -> cetak faktur A4, bukan struk */
+    body.mode-faktur #area-struk,
+    body.mode-faktur #area-struk * { visibility: hidden; display: none; }
+    body.mode-faktur #area-faktur,
+    body.mode-faktur #area-faktur * { visibility: visible; }
+    body.mode-faktur #area-faktur {
+      display: block !important;
+      position: absolute;
+      left: 0; top: 0;
+      width: 190mm;                 /* A4 (210mm) minus margin */
+      padding: 10mm;
+      font-family: "Segoe UI", Arial, sans-serif;
+      font-size: 12pt;
+      color: #000;
+      background: #fff;
+    }
+    body.mode-faktur table { page-break-inside: avoid; }
   }
   /* Pratinjau struk di layar */
   .struk-preview {
@@ -80,68 +72,116 @@
     white-space: pre-wrap;
     text-align: left;
   }
+
+  /* Brand sidebar */
+  .sidebar-brand .brand-link .brand-text { color: #fff; font-weight: 600; }
+  .sidebar-brand .brand-link i { color: #ffc107; font-size: 1.6rem; }
 </style>
 </head>
-<body>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
 
-<div class="d-flex">
+<div class="app-wrapper">
 
-  <!-- ============ SIDEBAR ============ -->
-  <nav class="sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="sidebar">
-    <div class="offcanvas-header d-lg-none">
-      <h5 class="offcanvas-title text-white">Menu</h5>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#sidebar"></button>
-    </div>
-    <div class="offcanvas-body d-flex flex-column p-3">
-      <a href="dashboard.html" class="brand text-decoration-none d-flex align-items-center gap-2 px-2 py-3 mb-2 fs-5">
-        <i class="bi bi-hammer"></i> <span id="brand-nama">TOKO BANGUNAN</span>
+  <!-- ============ SIDEBAR (AdminLTE) ============ -->
+  <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+    <div class="sidebar-brand">
+      <a href="dashboard.html" class="brand-link text-decoration-none">
+        <i class="bi bi-hammer"></i>
+        <span class="brand-text fs-5" id="brand-nama">TOKO BANGUNAN</span>
       </a>
-      <ul class="nav nav-pills flex-column mb-auto">
-        <li class="nav-item">
-          <a href="dashboard.html" class="nav-link"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
-        </li>
-        <li class="nav-item">
-          <a href="kasir.html" class="nav-link active"><i class="bi bi-cash-coin me-2"></i>Transaksi Kasir</a>
-        </li>
-        <li class="nav-item">
-          <a href="produk.html" class="nav-link"><i class="bi bi-box-seam me-2"></i>Manajemen Produk</a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link"><i class="bi bi-people me-2"></i>Pelanggan &amp; Supplier</a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link"><i class="bi bi-graph-up-arrow me-2"></i>Laporan Penjualan</a>
-        </li>
-        <li class="nav-item" id="menu-pengaturan">
-          <a href="pengaturan.html" class="nav-link"><i class="bi bi-gear me-2"></i>Pengaturan &amp; User</a>
-        </li>
-      </ul>
-      <hr class="text-secondary">
-      <div class="d-flex align-items-center px-2">
-        <i class="bi bi-person-circle fs-3 me-2"></i>
-        <div class="small">
-          <div class="text-white fw-semibold" id="user-nama">...</div>
-          <div class="text-secondary" id="user-username">...</div>
+    </div>
+    <div class="sidebar-wrapper">
+      <nav class="mt-2">
+        <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" data-accordion="false">
+          <li class="nav-item">
+            <a href="dashboard.html" class="nav-link">
+              <i class="nav-icon bi bi-speedometer2"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="kasir.html" class="nav-link active">
+              <i class="nav-icon bi bi-cash-coin"></i>
+              <p>Transaksi Kasir</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="produk.html" class="nav-link">
+              <i class="nav-icon bi bi-box-seam"></i>
+              <p>Manajemen Produk</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="pelanggan.html" class="nav-link">
+              <i class="nav-icon bi bi-people"></i>
+              <p>Pelanggan &amp; Supplier</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="laporan.html" class="nav-link">
+              <i class="nav-icon bi bi-graph-up-arrow"></i>
+              <p>Laporan Penjualan</p>
+            </a>
+          </li>
+          <li class="nav-item" id="menu-pengaturan">
+            <a href="pengaturan.html" class="nav-link">
+              <i class="nav-icon bi bi-gear"></i>
+              <p>Pengaturan &amp; User</p>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN (AdminLTE) ============ -->
+  <main class="app-main">
+
+    <!-- APP HEADER -->
+    <nav class="app-header navbar navbar-expand bg-body">
+      <div class="container-fluid">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button" aria-label="Buka/tutup menu"><i class="bi bi-list"></i></a>
+          </li>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item d-none d-md-flex align-items-center me-2">
+            <span class="badge bg-dark" id="jam-live">--:--:--</span>
+          </li>
+          <li class="nav-item dropdown user-menu">
+            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle fs-5"></i>
+              <span class="d-none d-md-inline" id="user-nama">...</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header" id="user-username">...</h6></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item text-danger" href="#" onclick="logout()">
+                  <i class="bi bi-box-arrow-left me-2"></i>Logout
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- CONTENT HEADER -->
+    <div class="app-content-header">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-sm-6">
+            <h1 class="mb-0 fs-3"><i class="bi bi-cash-coin me-2 text-primary"></i>Transaksi Kasir</h1>
+          </div>
         </div>
       </div>
-      <button class="btn btn-outline-light btn-sm mt-3" onclick="logout()">
-        <i class="bi bi-box-arrow-left me-1"></i>Logout
-      </button>
-    </div>
-  </nav>
-
-  <!-- ============ KONTEN UTAMA ============ -->
-  <main class="page-wrap flex-grow-1">
-
-    <div class="bg-white border-bottom px-3 px-sm-4 py-3 d-flex align-items-center gap-2 sticky-top">
-      <button class="btn btn-outline-secondary btn-sm d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar">
-        <i class="bi bi-list"></i>
-      </button>
-      <h4 class="mb-0 fw-bold"><i class="bi bi-cash-coin me-2 text-primary"></i>Transaksi Kasir</h4>
-      <span class="badge bg-dark ms-auto" id="jam-live">--:--:--</span>
     </div>
 
-    <div class="p-3 p-sm-4">
+    <!-- APP CONTENT -->
+    <div class="app-content">
+      <div class="container-fluid">
       <div class="row g-3">
 
         <!-- ===== KOLOM KIRI: CARI PRODUK & DAFTAR BELANJA ===== -->
@@ -261,12 +301,16 @@
           </div>
         </div>
       </div>
+    </div> <!-- /container-fluid -->
     </div>
   </main>
-</div>
+</div> <!-- /app-wrapper -->
 
 <!-- ============ AREA STRUK (hanya tampil saat print) ============ -->
 <div id="area-struk" aria-hidden="true"></div>
+
+<!-- ============ AREA FAKTUR A4 (khusus kontraktor, hanya saat print) ============ -->
+<div id="area-faktur" aria-hidden="true"></div>
 
 <!-- ============ MODAL TAMBAH PELANGGAN CEPAT ============ -->
 <div class="modal fade" id="modalPelanggan" tabindex="-1">
@@ -321,6 +365,9 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-warning fw-semibold d-none" id="btn-faktur-a4" onclick="cetakFakturA4()">
+          <i class="bi bi-file-earmark-text me-1"></i>Cetak Faktur A4
+        </button>
         <button type="button" class="btn btn-primary" onclick="cetakStruk()">
           <i class="bi bi-printer me-1"></i>Cetak Struk
         </button>
@@ -329,7 +376,8 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@4.10.0/dist/js/adminlte.min.js"></script>
 <script>
 /* =====================================================================
    Halaman Kasir memanggil 3 endpoint:
@@ -345,6 +393,7 @@ let dataProduk    = [];
 let dataPelanggan = [];
 let keranjang     = [];   // { id, kode, nama, satuan, harga, jumlah, stok }
 let fakturTerakhir = null; // data faktur dari server (untuk struk)
+let fakturPelanggan = null; // objek pelanggan pada faktur (untuk faktur A4)
 
 // ---------- Jam live ----------
 function jam() {
@@ -628,9 +677,19 @@ async function prosesBayar() {
 
     // Sukses: simpan faktur & tampilkan pratinjau struk
     fakturTerakhir = json.faktur;
+
+    // data pelanggan utk faktur A4 (kontraktor)
+    const idPel = document.getElementById('pilih-pelanggan').value;
+    fakturPelanggan = dataPelanggan.find(p => p.id == idPel) || null;
+    const kontraktor = fakturPelanggan?.tipe === 'kontraktor';
+    document.getElementById('btn-faktur-a4').classList.toggle('d-none', !kontraktor);
+
     document.getElementById('sukses-detail').innerHTML =
-      `Faktur <b>${fakturTerakhir.no_faktur}</b> &mdash; Kembalian ${rp(fakturTerakhir.kembalian)}`;
+      `Faktur <b>${fakturTerakhir.no_faktur}</b> &mdash; Kembalian ${rp(fakturTerakhir.kembalian)}` +
+      (kontraktor ? `<div class="small text-warning-emphasis mt-1"><i class="bi bi-file-earmark-text me-1"></i>Pelanggan kontraktor &mdash; faktur edisi A4 tersedia di bawah.</div>` : '');
     document.getElementById('preview-struk').textContent = buatStrukText();
+    // area cetak langsung diisi juga (guard Ctrl+P bila user tidak klik tombol)
+    document.getElementById('area-struk').textContent = buatStrukText();
     new bootstrap.Modal('#modalSukses').show();
 
     // reset transaksi + refresh stok terbaru dari server
@@ -696,7 +755,149 @@ function buatStrukText() {
   ].join('\n');
 }
 
-function cetakStruk() { window.print(); }
+function cetakStruk() {
+  if (!fakturTerakhir) {
+    alert('Belum ada struk untuk dicetak.\n\nSelesaikan pembayaran (tombol "Bayar") terlebih dahulu, lalu klik "Cetak Struk" pada pop-up sukses.');
+    return;
+  }
+  // Isi area cetak SEBELUM window.print() agar hasil cetak tidak kosong.
+  document.getElementById('area-struk').textContent = buatStrukText();
+  window.print();
+}
+
+// ================= FAKTUR A4 (PELANGGAN KONTRAKTOR) =================
+function htmlAman(s) {
+  return String(s ?? '').replace(/[&<>"']/g,
+    c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function buildAreaFaktur() {
+  const f = fakturTerakhir;
+  const t = pengaturanToko;
+  const p = fakturPelanggan;
+  const tgl = new Date().toLocaleString('id-ID', {
+    day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+  const garis = 'border-bottom:2px solid #000; padding-bottom:8px; margin-bottom:10px;';
+
+  const baris = f.items.map((i, idx) => `
+    <tr>
+      <td style="text-align:center; padding:6px 4px; border:1px solid #888;">${idx + 1}</td>
+      <td style="padding:6px; border:1px solid #888;">${htmlAman(i.nama)}</td>
+      <td style="text-align:center; padding:6px 4px; border:1px solid #888;">${htmlAman(i.satuan)}</td>
+      <td style="text-align:center; padding:6px 4px; border:1px solid #888;">${i.jumlah}</td>
+      <td style="text-align:right; padding:6px; border:1px solid #888;">${rp(Number(i.harga_satuan))}</td>
+      <td style="text-align:right; padding:6px; border:1px solid #888;">${rp(Number(i.subtotal))}</td>
+    </tr>`).join('');
+
+  const barisTotal = `
+    <tr><td colspan="4" style="border:none;"></td>
+        <td style="padding:6px; text-align:right; font-weight:600; border:1px solid #888;">Subtotal</td>
+        <td style="padding:6px; text-align:right; border:1px solid #888;">${rp(f.subtotal)}</td></tr>
+    <tr><td colspan="4" style="border:none;"></td>
+        <td style="padding:6px; text-align:right; font-weight:600; border:1px solid #888;">Diskon</td>
+        <td style="padding:6px; text-align:right; border:1px solid #888;">${rp(f.diskon)}</td></tr>
+    <tr><td colspan="4" style="border:none;"></td>
+        <td style="padding:8px; text-align:right; font-weight:700; font-size:13pt; background:#f1f3f5; border:1px solid #888;">GRAND TOTAL</td>
+        <td style="padding:8px; text-align:right; font-weight:700; font-size:13pt; background:#f1f3f5; border:1px solid #888;">${rp(f.total)}</td></tr>
+    <tr><td colspan="4" style="border:none;"></td>
+        <td style="padding:6px; text-align:right; border:1px solid #888;">Pembayaran (Tunai)</td>
+        <td style="padding:6px; text-align:right; border:1px solid #888;">${rp(Number(f.total) + Number(f.kembalian))}</td></tr>
+    <tr><td colspan="4" style="border:none;"></td>
+        <td style="padding:6px; text-align:right; border:1px solid #888;">Kembalian</td>
+        <td style="padding:6px; text-align:right; border:1px solid #888;">${rp(f.kembalian)}</td></tr>`;
+
+  document.getElementById('area-faktur').innerHTML = `
+    <!-- KOP FAKTUR -->
+    <div style="${garis}">
+      <table style="width:100%;">
+        <tr>
+          <td>
+            <div style="font-size:20pt; font-weight:800;">${htmlAman(t.nama_toko)}</div>
+            <div>${htmlAman(t.alamat_toko || '')}</div>
+            <div>${t.telepon_toko ? 'Telp: ' + htmlAman(t.telepon_toko) : ''}</div>
+          </td>
+          <td style="text-align:right; vertical-align:top;">
+            <div style="font-size:16pt; font-weight:800;">FAKTUR PENJUALAN</div>
+            <div>No: <b>${htmlAman(f.no_faktur)}</b></div>
+            <div>Tanggal: ${tgl}</div>
+            <div>Kasir: ${htmlAman(f.kasir)}</div>
+            <div><span style="border:2px solid #198754; color:#198754; padding:2px 10px; font-weight:700;">LUNAS</span></div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- PEMBERITAHUAN PEMBELI -->
+    <div style="margin-bottom:12px;">
+      <div style="font-size:11pt;">Kepada Yth:</div>
+      <div style="font-weight:700;">${htmlAman(p?.nama_pelanggan || f.pelanggan)} <span style="font-weight:400">(${htmlAman(p?.tipe || 'reguler')})</span></div>
+      <div style="font-size:11pt;">${htmlAman(p?.alamat || '-')}</div>
+      <div style="font-size:11pt;">${p?.telepon ? 'Telp: ' + htmlAman(p.telepon) : ''}</div>
+    </div>
+
+    <!-- TABEL BARANG -->
+    <table style="width:100%; border-collapse:collapse; font-size:11pt;" cellpadding="0">
+      <thead>
+        <tr style="background:#e9ecef; font-weight:700;">
+          <th style="width:5%;  padding:7px 4px; border:1px solid #888;">No.</th>
+          <th style="width:38%; padding:7px; border:1px solid #888; text-align:left;">Nama Barang</th>
+          <th style="width:10%; padding:7px 4px; border:1px solid #888;">Satuan</th>
+          <th style="width:10%; padding:7px 4px; border:1px solid #888;">Qty</th>
+          <th style="width:17%; padding:7px; border:1px solid #888; text-align:right;">Harga (Rp)</th>
+          <th style="width:20%; padding:7px; border:1px solid #888; text-align:right;">Subtotal (Rp)</th>
+        </tr>
+      </thead>
+      <tbody>${baris}</tbody>
+      <tfoot>${barisTotal}</tfoot>
+    </table>
+
+    <!-- CATATAN & TANDA TANGAN -->
+    <div style="margin-top:10mm; color:#444; font-size:10pt;">
+      Barang yang sudah dibeli tidak dapat dikembalikan kecuali ada kesepakatan terlebih dahulu.
+    </div>
+    <table style="width:100%; margin-top:14mm; font-size:11pt;">
+      <tr>
+        <td style="width:50%; text-align:center;">
+          <div>Hormat kami,</div>
+          <div style="margin-top:20mm; border-top:1px solid #000; width:60mm; margin-left:auto; margin-right:auto;">
+            Kasir &mdash; ${htmlAman(f.kasir)}
+          </div>
+        </td>
+        <td style="width:50%; text-align:center;">
+          <div>Penerima,</div>
+          <div style="margin-top:20mm; border-top:1px solid #000; width:60mm; margin-left:auto; margin-right:auto;">
+            ${htmlAman(p?.nama_pelanggan || 'Pembeli')}
+          </div>
+        </td>
+      </tr>
+    </table>`;
+}
+
+function cetakFakturA4() {
+  if (!fakturTerakhir) { alert('Belum ada faktur untuk dicetak.'); return; }
+  buildAreaFaktur();
+  document.body.classList.add('mode-faktur');
+  const bersih = () => document.body.classList.remove('mode-faktur');
+  window.addEventListener('afterprint', bersih, { once: true });
+  window.print();
+  setTimeout(bersih, 2000); // cadangan bila event afterprint tak terpicu
+}
+
+// ================= CTRL+P: CETAK YANG BENAR, BUKAN HALAMAN =================
+// Ctrl+P bawaan browser mencetak seluruh halaman POS (hasil: kertas kosong
+// karena CSS print hanya menampilkan #area-struk). Penanganan:
+//  - belum ada faktur & keranjang kosong -> blokir + beri petunjuk jelas;
+//  - sudah ada faktur  -> biarkan print berjalan (area struk sudah terisi);
+//  - keranjang masih diisi tapi belum dibayar -> biarkan (pencetakan halaman
+//    tidak membahayakan, hanya tidak berguna).
+document.addEventListener('keydown', e => {
+  if (!(e.ctrlKey || e.metaKey) || (e.key || '').toLowerCase() !== 'p') return;
+  if (!fakturTerakhir && keranjang.length === 0) {
+    e.preventDefault();
+    alert('Ctrl+P tidak bisa mencetak struk.\n\nGunakan tombol "Bayar" untuk menyelesaikan transaksi, lalu klik "Cetak Struk" pada pop-up sukses.');
+  }
+});
 
 // ================= INISIALISASI =================
 (async () => {

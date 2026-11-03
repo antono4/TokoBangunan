@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pelanggan &amp; Supplier - Toko Bangunan</title>
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+<!-- Font AdminLTE (Source Sans 3) -->
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" rel="stylesheet">
+<!-- AdminLTE v4 (sudah mencakup Bootstrap 5) -->
+<link href="https://cdn.jsdelivr.net/npm/admin-lte@4.10.0/dist/css/adminlte.min.css" rel="stylesheet">
+
+<style>
+  .card .card-title i { color: #0d6efd; }
+  table tbody td { vertical-align: middle; }
+  .btn-icon { padding: .25rem .5rem; }
+
+  /* Brand sidebar */
+  .sidebar-brand .brand-link .brand-text { color: #fff; font-weight: 600; }
+  .sidebar-brand .brand-link i { color: #ffc107; font-size: 1.6rem; }
+</style>
+</head>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+
+<div class="app-wrapper">
+
+  <!-- ============ SIDEBAR (AdminLTE) ============ -->
+  <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+    <div class="sidebar-brand">
+      <a href="dashboard.html" class="brand-link text-decoration-none">
+        <i class="bi bi-hammer"></i>
+        <span class="brand-text fs-5" id="brand-nama">TOKO BANGUNAN</span>
+      </a>
+    </div>
+    <div class="sidebar-wrapper">
+      <nav class="mt-2">
+        <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" data-accordion="false">
+          <li class="nav-item">
+            <a href="dashboard.html" class="nav-link">
+              <i class="nav-icon bi bi-speedometer2"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="kasir.html" class="nav-link">
+              <i class="nav-icon bi bi-cash-coin"></i>
+              <p>Transaksi Kasir</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="produk.html" class="nav-link">
+              <i class="nav-icon bi bi-box-seam"></i>
+              <p>Manajemen Produk</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="pelanggan.html" class="nav-link active">
+              <i class="nav-icon bi bi-people"></i>
+              <p>Pelanggan &amp; Supplier</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="laporan.html" class="nav-link">
+              <i class="nav-icon bi bi-graph-up-arrow"></i>
+              <p>Laporan Penjualan</p>
+            </a>
+          </li>
+          <li class="nav-item" id="menu-pengaturan">
+            <a href="pengaturan.html" class="nav-link">
+              <i class="nav-icon bi bi-gear"></i>
+              <p>Pengaturan &amp; User</p>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN (AdminLTE) ============ -->
+  <main class="app-main">
+
+    <!-- APP HEADER -->
+    <nav class="app-header navbar navbar-expand bg-body">
+      <div class="container-fluid">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button" aria-label="Buka/tutup menu"><i class="bi bi-list"></i></a>
+          </li>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item dropdown user-menu">
+            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle fs-5"></i>
+              <span class="d-none d-md-inline" id="user-nama">...</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header" id="user-username">...</h6></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item text-danger" href="#" onclick="logout()">
+                  <i class="bi bi-box-arrow-left me-2"></i>Logout
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- CONTENT HEADER -->
+    <div class="app-content-header">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-sm-6">
+            <h1 class="mb-0 fs-3"><i class="bi bi-people me-2 text-primary"></i>Pelanggan &amp; Supplier</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APP CONTENT -->
+    <div class="app-content">
+      <div class="container-fluid">
+      <div class="row g-3">
+
+        <!-- ============ CARD PELANGGAN ============ -->
+        <div class="col-xl-7">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="card-title fw-bold mb-0"><i class="bi bi-person-vcard me-2"></i>Daftar Pelanggan</h5>
+                <button class="btn btn-sm btn-primary" onclick="bukaModalPelanggan()">
+                  <i class="bi bi-person-plus me-1"></i>Tambah
+                </button>
+              </div>
+              <div class="table-responsive" style="max-height: 520px;">
+                <table class="table table-hover mb-0 align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Nama</th>
+                      <th>Telepon</th>
+                      <th>Tipe</th>
+                      <th>Alamat</th>
+                      <th class="text-center" style="width:12%">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="isi-pelanggan">
+                    <tr><td colspan="5" class="text-center text-secondary py-4">
+                      <span class="spinner-border me-2"></span>Memuat...
+                    </td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="text-secondary small mt-2">
+                Pelanggan bertipe <b>kontraktor</b> bisa menerima <b>faktur edisi A4</b> saat transaksi di kasir.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ CARD SUPPLIER ============ -->
+        <div class="col-xl-5">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="card-title fw-bold mb-0"><i class="bi bi-truck me-2"></i>Daftar Supplier</h5>
+                <button class="btn btn-sm btn-primary d-none" id="btn-tambah-supplier" onclick="bukaModalSupplier()">
+                  <i class="bi bi-truck me-1"></i>Tambah
+                </button>
+              </div>
+              <div class="table-responsive" style="max-height: 560px;">
+                <table class="table table-hover mb-0 align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Nama Supplier</th>
+                      <th>Telepon</th>
+                      <th class="text-center" style="width:16%">Brg</th>
+                      <th class="text-center" style="width:12%">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="isi-supplier">
+                    <tr><td colspan="4" class="text-center text-secondary py-4">
+                      <span class="spinner-border me-2"></span>Memuat...
+                    </td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="text-secondary small mt-2">
+                Menghapus supplier tidak menghapus produknya &mdash; kolom supplier
+                produk jadi kosong dan bisa diisi ulang.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> <!-- /container-fluid -->
+    </div>
+  </main>
+</div> <!-- /app-wrapper -->
+
+<!-- ============ MODAL PELANGGAN ============ -->
+<div class="modal fade" id="modalPelanggan" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="judul-modal-pelanggan">Tambah Pelanggan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form onsubmit="simpanPelanggan(event)">
+        <div class="modal-body">
+          <input type="hidden" id="pelanggan-id">
+          <div class="mb-3">
+            <label class="form-label">Nama Pelanggan <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="p-nama" required maxlength="100">
+          </div>
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="form-label">Telepon</label>
+              <input type="text" class="form-control" id="p-telepon" maxlength="20">
+            </div>
+            <div class="col-6">
+              <label class="form-label">Tipe <span class="text-danger">*</span></label>
+              <select class="form-select" id="p-tipe">
+                <option value="reguler">Reguler</option>
+                <option value="kontraktor">Kontraktor</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Alamat</label>
+              <textarea class="form-control" id="p-alamat" rows="2" maxlength="500"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btn-pelanggan"><i class="bi bi-save me-1"></i>Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL SUPPLIER ============ -->
+<div class="modal fade" id="modalSupplier" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="judul-modal-supplier">Tambah Supplier</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form onsubmit="simpanSupplier(event)">
+        <div class="modal-body">
+          <input type="hidden" id="supplier-id">
+          <div class="mb-3">
+            <label class="form-label">Nama Supplier <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="s-nama" required maxlength="100">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Telepon</label>
+            <input type="text" class="form-control" id="s-telepon" maxlength="20">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Alamat</label>
+            <textarea class="form-control" id="s-alamat" rows="2" maxlength="500"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btn-supplier"><i class="bi bi-save me-1"></i>Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@4.10.0/dist/js/adminlte.min.js"></script>
+<script>
+/* =====================================================================
+   Halaman memanggil:
+   - api/pelanggan_list.php / pelanggan_simpan.php / pelanggan_hapus.php
+     (insert boleh semua; edit & hapus admin)
+     (insert diizinkan semua; edit & hapus admin)
+   - api/supplier_list.php / supplier_simpan.php / supplier_hapus.php
+     (khusus admin; tombol Tambah/Edit disembunyikan untuk kasir)
+   ===================================================================== */
+
+let dataPelanggan = [];
+let dataSupplier  = [];
+let modalPelanggan, modalSupplier;
+let sesiUser = null;
+
+async function logout() {
+  await fetch('api/logout.php');
+  location.href = 'login.html';
+}
+
+// ================= MUAT DATA =================
+async function cekSession() {
+  const res = await fetch('api/me.php');
+  if (!res.ok) { location.href = 'login.html'; return null; }
+  const { user } = await res.json();
+  sesiUser = user;
+  document.getElementById('user-nama').textContent     = user.nama || user.username;
+  document.getElementById('user-username').textContent = user.role.toUpperCase() + ' \u2014 ' + user.username;
+  return user;
+}
+
+async function muatPengaturan() {
+  try {
+    const res = await fetch('api/pengaturan.php');
+    if (res.ok) {
+      const json = await res.json();
+      if (json.ok) document.getElementById('brand-nama').textContent = json.pengaturan.nama_toko;
+    }
+  } catch (e) { /* offline */ }
+}
+
+async function muatPelanggan() {
+  const res = await fetch('api/pelanggan_list.php');
+  if (res.status === 401) { location.href = 'login.html'; return; }
+  const json = await res.json();
+  if (!json.ok) return;
+  dataPelanggan = json.pelanggan;
+
+  const tbody = document.getElementById('isi-pelanggan');
+  if (dataPelanggan.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-secondary py-4">
+      <i class="bi bi-inbox fs-1 d-block mb-2"></i>Belum ada pelanggan.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = dataPelanggan.map(p => `
+    <tr>
+      <td class="fw-semibold">${p.nama_pelanggan}</td>
+      <td class="small">${p.telepon || '-'}</td>
+      <td>
+        ${p.tipe === 'kontraktor'
+          ? '<span class="badge bg-warning text-dark"><i class="bi bi-hammer me-1"></i>Kontraktor</span>'
+          : '<span class="badge bg-secondary-subtle text-secondary-emphasis">Reguler</span>'}
+      </td>
+      <td class="small text-secondary" style="max-width:180px;">${p.alamat || '-'}</td>
+      <td class="text-center">
+        ${sesiUser.role === 'admin' ? `
+          <button class="btn btn-sm btn-outline-primary btn-icon" title="Edit"
+                  onclick="bukaModalPelanggan(${p.id})"><i class="bi bi-pencil-square"></i></button>
+          <button class="btn btn-sm btn-outline-danger btn-icon" title="Hapus"
+                  onclick="hapusPelanggan(${p.id})"><i class="bi bi-trash3"></i></button>`
+        : '<span class="text-secondary small">hanya admin</span>'}
+      </td>
+    </tr>`).join('');
+}
+
+async function muatSupplier() {
+  const res = await fetch('api/supplier_list.php');
+  if (res.status === 401) { location.href = 'login.html'; return; }
+  const json = await res.json();
+  if (!json.ok) return;
+  dataSupplier = json.supplier;
+
+  // tombol tambah supplier hanya tampil untuk admin
+  if (sesiUser.role === 'admin') {
+    document.getElementById('btn-tambah-supplier').classList.remove('d-none');
+  }
+
+  const tbody = document.getElementById('isi-supplier');
+  tbody.innerHTML = dataSupplier.map(s => `
+    <tr>
+      <td>
+        <div class="fw-semibold">${s.nama_supplier}</div>
+        <div class="small text-secondary">${s.alamat || '-'}</div>
+      </td>
+      <td class="small">${s.telepon || '-'}</td>
+      <td class="text-center"><span class="badge bg-info-subtle text-info-emphasis">${s.jumlah_produk}</span></td>
+      <td class="text-center">
+        ${sesiUser.role === 'admin' ? `
+          <button class="btn btn-sm btn-outline-primary btn-icon" title="Edit"
+                  onclick="bukaModalSupplier(${s.id})"><i class="bi bi-pencil-square"></i></button>
+          <button class="btn btn-sm btn-outline-danger btn-icon" title="Hapus"
+                  onclick="hapusSupplier(${s.id})"><i class="bi bi-trash3"></i></button>`
+        : '<span class="text-secondary small">hanya admin</span>'}
+      </td>
+    </tr>`).join('');
+}
+
+// ================= PELANGGAN: TAMBAH / EDIT =================
+function bukaModalPelanggan(id = null) {
+  const p = id ? dataPelanggan.find(x => x.id === id) : null;
+  document.getElementById('pelanggan-id').value = id || '';
+  document.getElementById('p-nama').value    = p?.nama_pelanggan || '';
+  document.getElementById('p-telepon').value = p?.telepon || '';
+  document.getElementById('p-tipe').value    = p?.tipe || 'reguler';
+  document.getElementById('p-alamat').value  = p?.alamat || '';
+  document.getElementById('judul-modal-pelanggan').textContent =
+      p ? 'Edit Pelanggan' : 'Tambah Pelanggan';
+  modalPelanggan.show();
+}
+
+async function simpanPelanggan(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-pelanggan');
+  btn.disabled = true;
+  try {
+    const res = await fetch('api/pelanggan_simpan.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id:            document.getElementById('pelanggan-id').value,
+        nama_pelanggan: document.getElementById('p-nama').value.trim(),
+        telepon:       document.getElementById('p-telepon').value.trim(),
+        tipe:          document.getElementById('p-tipe').value,
+        alamat:        document.getElementById('p-alamat').value.trim()
+      })
+    });
+    if (res.status === 401) { location.href = 'login.html'; return; }
+    const json = await res.json();
+    if (!json.ok) { alert(json.message || 'Gagal menyimpan.'); return; }
+    modalPelanggan.hide();
+    await muatPelanggan();
+  } catch (err) {
+    alert('Tidak dapat terhubung ke server: ' + err.message);
+  } finally { btn.disabled = false; }
+}
+
+async function hapusPelanggan(id) {
+  const p = dataPelanggan.find(x => x.id === id);
+  if (!p || !confirm(`Yakin hapus pelanggan "${p.nama_pelanggan}"?`)) return;
+  try {
+    const res = await fetch('api/pelanggan_hapus.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    if (res.status === 401) { location.href = 'login.html'; return; }
+    const json = await res.json();
+    if (!json.ok) { alert(json.message || 'Tidak dapat dihapus.'); return; }
+    await muatPelanggan();
+  } catch (err) { alert('Tidak dapat terhubung ke server: ' + err.message); }
+}
+
+// ================= SUPPLIER: TAMBAH / EDIT =================
+function bukaModalSupplier(id = null) {
+  const s = id ? dataSupplier.find(x => x.id === id) : null;
+  document.getElementById('supplier-id').value = id || '';
+  document.getElementById('s-nama').value    = s?.nama_supplier || '';
+  document.getElementById('s-telepon').value = s?.telepon || '';
+  document.getElementById('s-alamat').value  = s?.alamat || '';
+  document.getElementById('judul-modal-supplier').textContent =
+      s ? 'Edit Supplier' : 'Tambah Supplier';
+  modalSupplier.show();
+}
+
+async function simpanSupplier(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-supplier');
+  btn.disabled = true;
+  try {
+    const res = await fetch('api/supplier_simpan.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id:            document.getElementById('supplier-id').value,
+        nama_supplier: document.getElementById('s-nama').value.trim(),
+        telepon:       document.getElementById('s-telepon').value.trim(),
+        alamat:        document.getElementById('s-alamat').value.trim()
+      })
+    });
+    if (res.status === 401) { location.href = 'login.html'; return; }
+    const json = await res.json();
+    if (!json.ok) { alert(json.message || 'Gagal menyimpan.'); return; }
+    modalSupplier.hide();
+    await muatSupplier();
+  } catch (err) {
+    alert('Tidak dapat terhubung ke server: ' + err.message);
+  } finally { btn.disabled = false; }
+}
+
+async function hapusSupplier(id) {
+  const s = dataSupplier.find(x => x.id === id);
+  if (!s) return;
+  const jumlah = s.jumlah_produk || 0;
+  const tanya = jumlah > 0
+    ? `Supplier "${s.nama_supplier}" menangani ${jumlah} produk.\nProduk TIDAK ikut terhapus (kembali tanpa supplier). Lanjutkan hapus?`
+    : `Yakin hapus supplier "${s.nama_supplier}"?`;
+  if (!confirm(tanya)) return;
+  try {
+    const res = await fetch('api/supplier_hapus.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    if (res.status === 401) { location.href = 'login.html'; return; }
+    const json = await res.json();
+    if (!json.ok) { alert(json.message || 'Tidak dapat dihapus.'); return; }
+    await muatSupplier();
+  } catch (err) { alert('Tidak dapat terhubung ke server: ' + err.message); }
+}
+
+// ================= INISIALISASI =================
+(async () => {
+  const u = await cekSession();
+  if (u === null) return;
+  modalPelanggan = new bootstrap.Modal('#modalPelanggan');
+  modalSupplier  = new bootstrap.Modal('#modalSupplier');
+  await Promise.all([muatPengaturan(), muatPelanggan(), muatSupplier()]);
+})();
+</script>
+</body>
+</html>

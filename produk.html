@@ -5,44 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Manajemen Produk - Toko Bangunan</title>
 
-<!-- Bootstrap 5 -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+<!-- Font AdminLTE (Source Sans 3) -->
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" rel="stylesheet">
+<!-- AdminLTE v4 (sudah mencakup Bootstrap 5) -->
+<link href="https://cdn.jsdelivr.net/npm/admin-lte@4.10.0/dist/css/adminlte.min.css" rel="stylesheet">
 
 <style>
-  :root {
-    --sidebar-w: 260px;
-    --brand: #0d6efd;
-    --dark: #1b2431;
-  }
-
-  body { background-color: #f4f6f9; font-family: "Segoe UI", system-ui, sans-serif; }
-
-  /* ================= SIDEBAR (identik antar halaman) ================= */
-  .sidebar {
-    width: var(--sidebar-w);
-    background: linear-gradient(180deg, var(--dark) 0%, #2c3a4f 100%);
-    color: #cbd3e1;
-  }
-  .sidebar .brand { font-weight: 700; color: #fff; letter-spacing: .5px; }
-  .sidebar .brand i { color: #ffcc00; }
-  .sidebar .nav-link {
-    color: #aebacf; padding: .7rem 1rem; border-radius: .5rem;
-    margin: .15rem .6rem; transition: all .2s;
-  }
-  .sidebar .nav-link:hover { background: rgba(255,255,255,.08); color: #fff; }
-  .sidebar .nav-link.active {
-    background: var(--brand); color: #fff;
-    box-shadow: 0 4px 10px rgba(13,110,253,.4);
-  }
-  @media (min-width: 992px) {
-    .sidebar { min-height: 100vh; position: sticky; top: 0; flex-shrink: 0; }
-    .page-wrap { margin-left: var(--sidebar-w); }
-  }
-
-  .card { border: none; border-radius: .9rem; box-shadow: 0 2px 12px rgba(20,30,50,.07); }
-  .card .card-title i { color: var(--brand); }
+  .card .card-title i { color: #0d6efd; }
 
   table tbody td { vertical-align: middle; }
 
@@ -50,67 +21,113 @@
   .badge-satuan { background-color: #e9ecef; color: #495057; font-size: .72rem; }
 
   .btn-icon { padding: .25rem .5rem; }
+
+  /* Brand sidebar */
+  .sidebar-brand .brand-link .brand-text { color: #fff; font-weight: 600; }
+  .sidebar-brand .brand-link i { color: #ffc107; font-size: 1.6rem; }
 </style>
 </head>
-<body>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
 
-<div class="d-flex">
+<div class="app-wrapper">
 
-  <!-- ============ SIDEBAR ============ -->
-  <nav class="sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="sidebar">
-    <div class="offcanvas-header d-lg-none">
-      <h5 class="offcanvas-title text-white">Menu</h5>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#sidebar"></button>
-    </div>
-    <div class="offcanvas-body d-flex flex-column p-3">
-      <a href="dashboard.html" class="brand text-decoration-none d-flex align-items-center gap-2 px-2 py-3 mb-2 fs-5">
-        <i class="bi bi-hammer"></i> <span id="brand-nama">TOKO BANGUNAN</span>
+  <!-- ============ SIDEBAR (AdminLTE) ============ -->
+  <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+    <div class="sidebar-brand">
+      <a href="dashboard.html" class="brand-link text-decoration-none">
+        <i class="bi bi-hammer"></i>
+        <span class="brand-text fs-5" id="brand-nama">TOKO BANGUNAN</span>
       </a>
-      <ul class="nav nav-pills flex-column mb-auto">
-        <li class="nav-item">
-          <a href="dashboard.html" class="nav-link"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
-        </li>
-        <li class="nav-item">
-          <a href="kasir.html" class="nav-link"><i class="bi bi-cash-coin me-2"></i>Transaksi Kasir</a>
-        </li>
-        <li class="nav-item">
-          <a href="produk.html" class="nav-link active"><i class="bi bi-box-seam me-2"></i>Manajemen Produk</a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link"><i class="bi bi-people me-2"></i>Pelanggan &amp; Supplier</a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link"><i class="bi bi-graph-up-arrow me-2"></i>Laporan Penjualan</a>
-        </li>
-        <li class="nav-item" id="menu-pengaturan">
-          <a href="pengaturan.html" class="nav-link"><i class="bi bi-gear me-2"></i>Pengaturan &amp; User</a>
-        </li>
-      </ul>
-      <hr class="text-secondary">
-      <div class="d-flex align-items-center px-2">
-        <i class="bi bi-person-circle fs-3 me-2"></i>
-        <div class="small">
-          <div class="text-white fw-semibold" id="user-nama">...</div>
-          <div class="text-secondary" id="user-username">...</div>
+    </div>
+    <div class="sidebar-wrapper">
+      <nav class="mt-2">
+        <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" data-accordion="false">
+          <li class="nav-item">
+            <a href="dashboard.html" class="nav-link">
+              <i class="nav-icon bi bi-speedometer2"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="kasir.html" class="nav-link">
+              <i class="nav-icon bi bi-cash-coin"></i>
+              <p>Transaksi Kasir</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="produk.html" class="nav-link active">
+              <i class="nav-icon bi bi-box-seam"></i>
+              <p>Manajemen Produk</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="pelanggan.html" class="nav-link">
+              <i class="nav-icon bi bi-people"></i>
+              <p>Pelanggan &amp; Supplier</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="laporan.html" class="nav-link">
+              <i class="nav-icon bi bi-graph-up-arrow"></i>
+              <p>Laporan Penjualan</p>
+            </a>
+          </li>
+          <li class="nav-item" id="menu-pengaturan">
+            <a href="pengaturan.html" class="nav-link">
+              <i class="nav-icon bi bi-gear"></i>
+              <p>Pengaturan &amp; User</p>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN (AdminLTE) ============ -->
+  <main class="app-main">
+
+    <!-- APP HEADER -->
+    <nav class="app-header navbar navbar-expand bg-body">
+      <div class="container-fluid">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button" aria-label="Buka/tutup menu"><i class="bi bi-list"></i></a>
+          </li>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item dropdown user-menu">
+            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle fs-5"></i>
+              <span class="d-none d-md-inline" id="user-nama">...</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header" id="user-username">...</h6></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item text-danger" href="#" onclick="logout()">
+                  <i class="bi bi-box-arrow-left me-2"></i>Logout
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- CONTENT HEADER -->
+    <div class="app-content-header">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-sm-6">
+            <h1 class="mb-0 fs-3"><i class="bi bi-box-seam me-2 text-primary"></i>Manajemen Produk</h1>
+          </div>
         </div>
       </div>
-      <button class="btn btn-outline-light btn-sm mt-3" onclick="logout()">
-        <i class="bi bi-box-arrow-left me-1"></i>Logout
-      </button>
-    </div>
-  </nav>
-
-  <!-- ============ KONTEN UTAMA ============ -->
-  <main class="page-wrap flex-grow-1">
-
-    <div class="bg-white border-bottom px-3 px-sm-4 py-3 d-flex align-items-center gap-2 sticky-top">
-      <button class="btn btn-outline-secondary btn-sm d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebar">
-        <i class="bi bi-list"></i>
-      </button>
-      <h4 class="mb-0 fw-bold"><i class="bi bi-box-seam me-2 text-primary"></i>Manajemen Produk</h4>
     </div>
 
-    <div class="p-3 p-sm-4">
+    <!-- APP CONTENT -->
+    <div class="app-content">
+      <div class="container-fluid">
 
       <!-- Toolbar: cari + filter kategori + tombol tambah -->
       <div class="card mb-3">
@@ -158,9 +175,10 @@
       <div class="text-secondary small mt-2">
         Menampilkan <span id="jumlah-tampil">0</span> dari <span id="jumlah-total">0</span> produk.
       </div>
+    </div> <!-- /container-fluid -->
     </div>
   </main>
-</div>
+</div> <!-- /app-wrapper -->
 
 <!-- ============ MODAL TAMBAH / EDIT PRODUK ============ -->
 <div class="modal fade" id="modalProduk" tabindex="-1">
@@ -249,7 +267,8 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@4.10.0/dist/js/adminlte.min.js"></script>
 <script>
 /* =====================================================================
    Data & operasi CRUD mengarah ke backend:

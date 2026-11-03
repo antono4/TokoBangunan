@@ -1,15 +1,19 @@
 #       🏗️ Toko Bangunan — Aplikasi Penjualan (POS)
 
 Aplikasi kasir &amp; manajemen toko bangunan berbasis web: input penjualan cepat,
-stok berkurang **otomatis**, struk siap cetak, laporan + grafik, serta halaman
-pengaturan nama toko &amp; manajemen user.
+stok berkurang **otomatis**, struk siap cetak, faktur A4 kontraktor, laporan +
+grafik + export CSV, serta halaman pengaturan nama toko &amp; manajemen user.
 
-> Dibuat dengan **HTML + Bootstrap 5** (tampilan), **PHP** (server/API),
-> dan **MySQL** (database).
+> Dibuat dengan **HTML + AdminLTE 4 (Bootstrap 5)** (tampilan), **PHP**
+> (server/API), dan **MySQL** (database).
 
 ---
 
 ## 🖼️ Tampilan Aplikasi
+
+> UI kini memakai **AdminLTE 4** (sidebar + topbar). Screenshot klasik di bawah
+> masih dari versi Bootstrap polos — tampilan terbaru serupa, menambah
+> menu **Pelanggan &amp; Supplier** dan **Laporan Penjualan**.
 
 ### 1. Halaman Login
 Satu pintu masuk untuk admin &amp; kasir. Password tersimpan terenkripsi (hash).
@@ -47,12 +51,15 @@ kelola akun user beserta **level**-nya.
 | Fitur | Keterangan |
 |---|---|
 | 💰 Kasir (POS) | Pencarian barang, keranjang, diskon, kembalian, cetak struk 80mm |
+| 🧾 Faktur A4 kontraktor | Pelanggan bertipe *kontraktor* otomatis dapat faktur A4 (selain struk thermal) |
 | 📦 Manajemen Produk | Satuan bervariasi: sak, pcs, batang, meter, dus, kg, liter, roll, m², m³ |
 | ⚡ Stok otomatis | Stok berkurang sendiri saat transaksi (Trigger SQL), kembali bila dibatalkan |
-| 👥 Pelanggan | Pembeli umum, reguler, atau kontraktor |
-| 📊 Dashboard &amp; laporan | Omzet hari ini, grafik 7/14/30 hari, barang terlaris, stok menipis |
+| 👥 Pelanggan &amp; Supplier | Tipe pembeli (umum/reguler/kontraktor), master supplier + jumlah produk |
+| 📊 Laporan Penjualan | Harian &amp; bulanan + rincian faktur + grafik + **export CSV** (siap Excel) |
+| 🩺 Diagnostik database | Tombol **Periksa &amp; Perbaiki** (admin): cek DB & trigger stok, biar &amp; perbaiki otomatis |
 | 🔐 Manajemen user | Tambah/edit/hapus akun + level (admin / kasir) |
 | 🏪 Identitas toko | Nama, alamat, telepon otomatis dipakai di login, sidebar, dan struk |
+| 🖥️ UI AdminLTE 4 | Sidebar, topbar, dropdown user — basis Bootstrap 5, responsif (desktop &amp; HP) |
 
 ---
 
@@ -95,9 +102,13 @@ kelola akun user beserta **level**-nya.
 |---|:---:|:---:|
 | Transaksi kasir / cetak struk | ✅ | ✅ |
 | Lihat dashboard &amp; daftar produk | ✅ | ✅ |
+| Lihat &amp; export laporan | ✅ | ✅ |
+| Tambah pelanggan (untuk POS) | ✅ | ✅ |
 | Tambah/edit/hapus produk | ✅ | ❌ |
+| Kelola master pelanggan &amp; supplier | ✅ | ❌ |
 | Pengaturan nama toko | ✅ | ❌ |
 | Tambah/edit/hapus user | ✅ | ❌ |
+| Diagnostik &amp; perbaiki database | ✅ | ❌ |
 
 ---
 
@@ -105,24 +116,32 @@ kelola akun user beserta **level**-nya.
 
 ```
 TokoBangunan/
-├── login.html              # Halaman login
+├── login.html              # Halaman login (AdminLTE)
 ├── dashboard.html          # Ringkasan + grafik (Chart.js)
-├── kasir.html              # Transaksi kasir + struk
+├── kasir.html              # Transaksi kasir + struk 80mm + faktur A4
 ├── produk.html             # Master produk (CRUD)
-├── pengaturan.html         # Identitas toko + manajemen user
+├── pelanggan.html          # Master pelanggan & supplier
+├── laporan.html            # Laporan harian/bulanan + grafik + export CSV
+├── pengaturan.html         # Identitas toko + manajemen user + diagnostik DB
 ├── includes/
-│   └── config.php          # Koneksi database, session, pengaman role
+│   ├── config.php          # Koneksi database, session, pengaman role
+│   └── dbhealth.php        # Kesehatan DB: status & perbaikan otomatis
 ├── api/                    # "otak" aplikasi (PHP)
 │   ├── login.php / logout.php / me.php
 │   ├── produk_list / produk_simpan / produk_hapus .php
-│   ├── pelanggan_list / pelanggan_simpan .php
+│   ├── pelanggan_list / pelanggan_simpan / pelanggan_hapus .php
+│   ├── supplier_list / supplier_simpan / supplier_hapus .php
 │   ├── penjualan_simpan.php     # simpan transaksi (aman, 1x klik)
 │   ├── dashboard.php            # data ringkasan & grafik
+│   ├── laporan.php              # laporan harian/bulanan/detail + terlaris
+│   ├── laporan_export.php       # unduh laporan sebagai CSV (BOM UTF-8)
+│   ├── cek_database.php         # status kesehatan DB (publik)
+│   ├── perbaiki_database.php    # buat ulang trigger/akun (admin)
 │   ├── pengaturan.php           # nama/alamat/telepon toko
 │   └── user_list / user_simpan / user_hapus .php
 ├── db_tokobangunan.sql     # build database (import dulu!)
 ├── upgrade_v2.sql          # patch utk database lama
-├── test_pengujian.php      # 46 test otomatis (semua PASS)
+├── test_pengujian.php      # 70 test otomatis (semua PASS)
 └── docs/img/               # screenshot untuk README ini
 ```
 
@@ -137,10 +156,15 @@ TokoBangunan/
   database sendiri, bukan oleh kode PHP, jadi tidak ada jalur terlewat.
 - **Stok kurang saat dikasir?** Transaksi langsung ditolak dengan pesan jelas,
   tidak ada data masuk setengah-setengah (database transaction + rollback).
+- **Riwayat faktur tetap akurat** — pelanggan yang sudah pernah bertransaksi
+  ditolak untuk dihapus (FK RESTRICT), jadi faktur lama selalu menunjuk
+  orang yang benar, bukan berubah jadi "Pembeli Umum".
 - **Kasir tidak bisa mengubah master** — semua pengaturan & produk hanya untuk
   admin (dicek server, bukan cuma menu yang disembunyikan).
 - **Harga tak bisa dipalsukan** dari sisi browser — total dihitung ulang di
   server dari harga resmi di database.
+- **Database bisa pulih sendiri** — tombol "Periksa & Perbaiki" membuat ulang
+  trigger stok, tabel pengaturan, dan akun default bila ada yang hilang.
 - **Password di-hash** (`bcrypt`), semua query pakai *prepared statement*
   (aman dari serangan SQL injection).
 
@@ -148,9 +172,11 @@ TokoBangunan/
 
 ## 🧪 Menguji Sendiri Aplikasi
 
-Workspace ini dilengkapi **46 test otomatis** yang menguji semua fitur:
-login, CRUD produk, transaksi + trigger stok, dashboard, pengaturan, user,
-dan penolakan akses kasir. Status terakhir: **46 PASS / 0 GAGAL**.
+Workspace ini dilengkapi **70 test otomatis** yang menguji semua fitur:
+login, CRUD produk, transaksi + trigger stok, dashboard, laporan + CSV,
+pelanggan/supplier, pengaturan, user, penolakan akses kasir, dan diagnostik
+database (termasuk simulasi trigger hilang → perbaikan otomatis). Status
+terakhir: **70 PASS / 0 GAGAL**.
 
 ```bash
 # 1. Pastikan MySQL & server PHP aktif
@@ -169,14 +195,22 @@ php test_pengujian.php
 |---|---|
 | "Koneksi database gagal" | Pastikan MySQL di XAMPP sudah **Start**, cek user/password di `includes/config.php` |
 | Halaman putih kosong | Apache belum start, atau folder belum di `htdocs` |
-| Login salah terus | Pastikan sudah import `db_tokobangunan.sql` (akun demo ada di dalamnya) |
-| Stok tidak berkurang | Trigger belum terbentuk → import ulang `db_tokobangunan.sql` |
-| Struk kosong saat cetak | Gunakan tombol **Cetak Struk** pada pop-up sukses (bukan Ctrl-P browser) |
+| Login salah terus + banner "Perlu Perbaikan Backend" | Banner di login menjelaskan kendala persis (DB belum ada/tabel kurang). Import `db_tokobangunan.sql`, atau login admin → **Pengaturan → tombol Periksa & Perbaiki** |
+| Stok tidak berkurang | Trigger hilang (mis. hasil import parsial) → tombol **Periksa & Perbaiki** membuat ulang 3 trigger stok otomatis |
+| Hapus pelanggan ditolak | Memang disengaja: pelanggan yang sudah pernah bertransaksi dilindungi FK RESTRICT agar faktur lama tetap menunjuk orang yang benar |
+| Struk kosong saat cetak | Gunakan tombol **Cetak Struk** pada pop-up sukses (bukan Ctrl-P browser) — Ctrl+P sengaja diblokir agar tidak mencetak layar kosong; faktur A4 justru muncul otomatis untuk pelanggan kontraktor |
+| CSV rusak di Excel | File CSV dihasilkan dengan BOM UTF-8 + pemisah koma; jangan edit dulu di notepad "save as ANSI" |
 
 ---
 
 ## 🗺️ Rencana Pengembangan
 
-- [ ] Menu **Pelanggan &amp; Supplier** (API sudah tersedia)
-- [ ] Halaman **Laporan Penjualan** lengkap (harian/bulanan + export)
-- [ ] Struk edisi faktur (A4) khusus kontraktor
+- [x] Menu **Pelanggan &amp; Supplier** (list, tambah, edit, hapus)
+- [x] Halaman **Laporan Penjualan** lengkap (harian/bulanan/rincian + export CSV)
+- [x] Struk edisi **faktur A4** khusus kontraktor
+- [x] Diagnostik database + tombol **Periksa &amp; Perbaiki**
+- [x] Tampilan **AdminLTE 4** (sidebar, topbar, tema Bootstrap 5)
+- [ ] Notifikasi stok menipis (mis. kirim WhatsApp/email)
+- [ ] Retur &amp; nota kredit (stok masuk kembali otomatis, bukan hapus faktur)
+- [ ] Multi-outlet / peran gudang
+- [ ] Laporan laba kotor (harga beli vs jual per periode)
