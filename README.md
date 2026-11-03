@@ -1,127 +1,182 @@
-# Aplikasi Penjualan — Toko Bangunan
+# 🏗️ Toko Bangunan — Aplikasi Penjualan (POS)
 
-Aplikasi penjualan/kasir (POS) berbasis web: **HTML + Bootstrap 5 (frontend)**,
-**PHP (backend REST API)**, dan **MySQL** (database) dengan trigger otomatis
-potong stok.
+Aplikasi kasir &amp; manajemen toko bangunan berbasis web: input penjualan cepat,
+stok berkurang **otomatis**, struk siap cetak, laporan + grafik, serta halaman
+pengaturan nama toko &amp; manajemen user.
 
----
-
-## 📁 Struktur Proyek
-
-```
-TOKO/
-├── db_tokobangunan.sql        # Blueprint database (jalankan dulu!)
-├── login.html                 # Halaman login
-├── dashboard.html             # Dashboard (ringkasan + grafik Chart.js)
-├── kasir.html                 # POS: keranjang, diskon, struk thermal 80mm
-├── produk.html                # CRUD master produk
-├── pengaturan.html            # Edit nama/alamat/telepon toko + manajemen user (admin)
-├── includes/
-│   └── config.php             # Koneksi PDO + session + helper auth/JSON
-└── api/
-    ├── login.php  logout.php  me.php
-    ├── produk_list.php  produk_simpan.php  produk_hapus.php
-    ├── pelanggan_list.php  pelanggan_simpan.php
-    ├── pengaturan.php                # Identitas toko (GET publik, POST admin)
-    ├── user_list.php  user_simpan.php  user_hapus.php   # Manajemen user (admin)
-    ├── penjualan_simpan.php          # Transaksi POS (DB transaction)
-    └── dashboard.php                 # Data ringkasan + grafik + terlaris
-```
+> Dibuat dengan **HTML + Bootstrap 5** (tampilan), **PHP** (server/API),
+> dan **MySQL** (database).
 
 ---
 
-## 🚀 Cara Menjalankan (XAMPP)
+## 🖼️ Tampilan Aplikasi
 
-1. **Install & jalankan XAMPP** → aktifkan modul **Apache** dan **MySQL**.
+### 1. Halaman Login
+Satu pintu masuk untuk admin &amp; kasir. Password tersimpan terenkripsi (hash).
 
-2. **Pindahkan folder ini** ke `C:\xampp\htdocs\TOKO`.
+![Halaman Login](docs/img/01-login.png)
 
-3. **Import database:**
-   - Buka `http://localhost/phpmyadmin` (atau via `mysql` CLI),
-   - Import file `db_tokobangunan.sql`
-     (script sudah berisi `CREATE DATABASE`, tabel, trigger, view,
-     dan data contoh).
-   - Bila database sudah ada dari versi lama, jalankan saja
-     `upgrade_v2.sql` (menambah tabel `pengaturan`).
-   - Password seed sudah ter-hash `password_hash()`:
-     - `admin` / `admin123` (role admin)
-     - `kasir1` / `kasir123` (role kasir)
+### 2. Dashboard
+Ringkasan harian: total produk, pendapatan hari ini, jumlah transaksi,
+**peringatan stok menipis**, dan grafik penjualan + barang paling laris.
 
-4. **Sesuaikan koneksi** bila perlu di `includes/config.php`
-   (`DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`).
+![Dashboard](docs/img/02-dashboard.png)
 
-5. **Buka aplikasi:** `http://localhost/TOKO/login.html`
+### 3. Kasir (POS)
+Cari barang → masuk keranjang → isi diskon &amp; uang bayar → kembalian
+terhitung otomatis → cetak struk. Satuan mengikuti barang (sak/pcs/batang/meter).
 
----
+![Kasir](docs/img/03-kasir.png)
 
-## 🔐 Hak Akses Role
+### 4. Manajemen Produk
+Daftar seluruh material: harga beli/jual, stok (badge merah = menipis),
+supplier, serta tombol tambah/edit/hapus.
 
-| Aksi                          | admin | kasir |
-|-------------------------------|:-----:|:-----:|
-| Login & transaksi kasir (POS) |  ✅   |  ✅   |
-| Lihat dashboard/produk        |  ✅   |  ✅   |
-| Tambah / edit / hapus produk  |  ✅   |  ❌   |
-| Tambah pelanggan              |  ✅   |  ✅   |
-| Pengaturan nama toko          |  ✅   |  ❌   |
-| Manajemen user + level        |  ✅   |  ❌   |
+![Manajemen Produk](docs/img/04-produk.png)
 
-Guard dilakukan per-API (`require_login([roles])` di `includes/config.php`),
-HTTP 401 bila belum login (frontend redirect ke `login.html`), HTTP 403 bila
-role tidak diizinkan.
+### 5. Pengaturan &amp; User (khusus admin)
+Edit **nama/alamat/telepon toko** (otomatis dipakai di seluruh aplikasi dan struk),
+kelola akun user beserta **level**-nya.
+
+![Pengaturan & User](docs/img/05-pengaturan.png)
 
 ---
 
-## 💡 Hal Penting Desain
+## ✨ Fitur
 
-- **Stok otomatis**: potong stok ditangani **trigger SQL**
-  (`trg_kurangi_stok`) saat `INSERT detail_penjualan` — backend tidak
-  mengubah stok secara manual, sehingga tidak bisa "terlewat" oleh bug PHP.
-  Trigger juga `SIGNAL` 45000 bila stok kurang → transaksi dibatalkan.
-- **Total dihitung ulang di server**: `api/penjualan_simpan.php` mengabaikan
-  harga dari client, membaca `harga_jual` terkini dengan `SELECT ... FOR UPDATE`
-  dalam satu **DB transaction** — mencegah manipulasi & race condition stok.
-- **No. faktur**: generator `TRX-YYYYMMDD-0001` di API dengan pengecekan
-  duplikat (aman dari race condition bila 2 kasir men-doubleclick).
-- **Struk**: nominal struk mengambil data faktur yang dikembalikan server,
-  bukan hitungan sisi client; cetak via `window.print()` (CSS `@media print`,
-  lebar 80mm untuk printer thermal).
-- **Keamanan**: PDO prepared statement (anti SQL injection),
-  `password_verify` bcrypt, `session_regenerate_id`, cek role per endpoint.
-
----
-
-## 🧪 Uji Cepat Setelah Instalasi
-
-1. Login sebagai `kasir1`.
-2. Buka **Transaksi Kasir** → ketik `semen` di pencarian → pilih produk →
-   set jumlah 2 → klik **Pas** → **BAYAR & CETAK STRUK**.
-3. Struk muncul dengan no. faktur `TRX-...`; stok Semen Gresik berkurang 2
-   (cek di **Manajemen Produk**).
-4. Buka **Dashboard** → pendapatan hari ini bertambah.
-
-## ✅ Hasil Pengujian Otomatis
-
-`php test_pengujian.php` menguji end-to-end seluruh API (46 test):
-
-| Kategori | Cakupan |
+| Fitur | Keterangan |
 |---|---|
-| Autentikasi | login benar/salah, guard 401, session |
-| Produk | read, insert, update, duplikat 409, validasi 422 |
-| Kasir & trigger | no. faktur, kembalian, stok otomatis 118→116, rollback stok kurang |
-| Dashboard | omzet, grafik 7/14/30 hari, stok menipis, terlaris |
-| Pengaturan | edit nama toko + guard role |
-| User & level | CRUD user, reset password, hapus admin terakhir ditolak, kasir ditolak 403 |
-| Security | harga palsu dari client diabaikan, FK produk tertransaksi |
-
-Status terakhir: **46 PASS / 0 GAGAL** (MySQL + `php -S` harus aktif,
-database di-reset dulu dengan import `db_tokobangunan.sql`).
+| 💰 Kasir (POS) | Pencarian barang, keranjang, diskon, kembalian, cetak struk 80mm |
+| 📦 Manajemen Produk | Satuan bervariasi: sak, pcs, batang, meter, dus, kg, liter, roll, m², m³ |
+| ⚡ Stok otomatis | Stok berkurang sendiri saat transaksi (Trigger SQL), kembali bila dibatalkan |
+| 👥 Pelanggan | Pembeli umum, reguler, atau kontraktor |
+| 📊 Dashboard &amp; laporan | Omzet hari ini, grafik 7/14/30 hari, barang terlaris, stok menipis |
+| 🔐 Manajemen user | Tambah/edit/hapus akun + level (admin / kasir) |
+| 🏪 Identitas toko | Nama, alamat, telepon otomatis dipakai di login, sidebar, dan struk |
 
 ---
 
-## ➕ Pengembangan Selanjutnya (opsional)
+## 🚀 Cara Menjalankan (dengan XAMPP)
 
-- Halaman **Pelanggan & Supplier menu** (API `pelanggan_*` sudah siap,
-  tinggal tambah `supplier_list.php`/`supplier_simpan.php`).
-- Menu **Laporan Penjualan** (query contoh ada di bawah file
-  `db_tokobangunan.sql`, view `v_laporan_harian` siap pakai).
-- Upload foto produk, nota A4 untuk kontraktor, dan export Excel laporan.
+> Aplikasi ini butuh **XAMPP** (yang menyediakan Apache, PHP, dan MySQL).
+> Belum punya? Unduh gratis di <https://www.apachefriends.org>.
+
+1. **Install lalu buka XAMPP** → klik **Start** pada `Apache` dan `MySQL`.
+2. **Salin folder project ini** ke:
+   ```
+   C:\xampp\htdocs\TokoBangunan
+   ```
+3. **Buat databasenya** (sekali saja):
+   - Buka browser → `http://localhost/phpmyadmin`
+   - Menu **Import** → pilih file `db_tokobangunan.sql` → klik **Import**.
+   - Selesai! Database `db_tokobangunan` beserta tabel, data contoh, dan
+     trigger stok otomatis langsung terbentuk.
+4. **Buka aplikasinya**:
+   ```
+   http://localhost/TokoBangunan/login.html
+   ```
+5. Login menggunakan akun demo di bawah. 🎉
+
+> Punya database lama dari versi sebelumnya? Jalankan saja `upgrade_v2.sql`
+> untuk menambah tabel pengaturan tanpa merusak data.
+
+---
+
+## 🔑 Akun Demo
+
+| Level | Username | Password |
+|---|---|---|
+| Admin (akses penuh) | `admin` | `admin123` |
+| Kasir (hanya kasir) | `kasir1` | `kasir123` |
+
+### Hak akses per level
+
+| Aksi | Admin | Kasir |
+|---|:---:|:---:|
+| Transaksi kasir / cetak struk | ✅ | ✅ |
+| Lihat dashboard &amp; daftar produk | ✅ | ✅ |
+| Tambah/edit/hapus produk | ✅ | ❌ |
+| Pengaturan nama toko | ✅ | ❌ |
+| Tambah/edit/hapus user | ✅ | ❌ |
+
+---
+
+## 📂 Struktur Folder
+
+```
+TokoBangunan/
+├── login.html              # Halaman login
+├── dashboard.html          # Ringkasan + grafik (Chart.js)
+├── kasir.html              # Transaksi kasir + struk
+├── produk.html             # Master produk (CRUD)
+├── pengaturan.html         # Identitas toko + manajemen user
+├── includes/
+│   └── config.php          # Koneksi database, session, pengaman role
+├── api/                    # "otak" aplikasi (PHP)
+│   ├── login.php / logout.php / me.php
+│   ├── produk_list / produk_simpan / produk_hapus .php
+│   ├── pelanggan_list / pelanggan_simpan .php
+│   ├── penjualan_simpan.php     # simpan transaksi (aman, 1x klik)
+│   ├── dashboard.php            # data ringkasan & grafik
+│   ├── pengaturan.php           # nama/alamat/telepon toko
+│   └── user_list / user_simpan / user_hapus .php
+├── db_tokobangunan.sql     # build database (import dulu!)
+├── upgrade_v2.sql          # patch utk database lama
+├── test_pengujian.php      # 46 test otomatis (semua PASS)
+└── docs/img/               # screenshot untuk README ini
+```
+
+💡 **Mengganti koneksi database?** Edit bagian atas `includes/config.php`
+(host, nama database, user, password MySQL Anda).
+
+---
+
+## 🛡️ Yang Sudah Dijamin Aman
+
+- **Stok tidak bisa "bocor"** — pengurangan stok dikerjakan oleh *trigger* di
+  database sendiri, bukan oleh kode PHP, jadi tidak ada jalur terlewat.
+- **Stok kurang saat dikasir?** Transaksi langsung ditolak dengan pesan jelas,
+  tidak ada data masuk setengah-setengah (database transaction + rollback).
+- **Kasir tidak bisa mengubah master** — semua pengaturan & produk hanya untuk
+  admin (dicek server, bukan cuma menu yang disembunyikan).
+- **Harga tak bisa dipalsukan** dari sisi browser — total dihitung ulang di
+  server dari harga resmi di database.
+- **Password di-hash** (`bcrypt`), semua query pakai *prepared statement*
+  (aman dari serangan SQL injection).
+
+---
+
+## 🧪 Menguji Sendiri Aplikasi
+
+Workspace ini dilengkapi **46 test otomatis** yang menguji semua fitur:
+login, CRUD produk, transaksi + trigger stok, dashboard, pengaturan, user,
+dan penolakan akses kasir. Status terakhir: **46 PASS / 0 GAGAL**.
+
+```bash
+# 1. Pastikan MySQL & server PHP aktif
+# 2. Reset database ke data awal (opsional tapi disarankan)
+mysql -u root < db_tokobangunan.sql
+
+# 3. Jalankan test
+php test_pengujian.php
+```
+
+---
+
+## ❓ Masalah Umum
+
+| Gejala | Solusi |
+|---|---|
+| "Koneksi database gagal" | Pastikan MySQL di XAMPP sudah **Start**, cek user/password di `includes/config.php` |
+| Halaman putih kosong | Apache belum start, atau folder belum di `htdocs` |
+| Login salah terus | Pastikan sudah import `db_tokobangunan.sql` (akun demo ada di dalamnya) |
+| Stok tidak berkurang | Trigger belum terbentuk → import ulang `db_tokobangunan.sql` |
+| Struk kosong saat cetak | Gunakan tombol **Cetak Struk** pada pop-up sukses (bukan Ctrl-P browser) |
+
+---
+
+## 🗺️ Rencana Pengembangan
+
+- [ ] Menu **Pelanggan &amp; Supplier** (API sudah tersedia)
+- [ ] Halaman **Laporan Penjualan** lengkap (harian/bulanan + export)
+- [ ] Struk edisi faktur (A4) khusus kontraktor
