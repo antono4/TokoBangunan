@@ -18,7 +18,7 @@ grafik + export CSV, serta halaman pengaturan nama toko &amp; manajemen user.
 ### 1. Halaman Login
 Satu pintu masuk untuk admin &amp; kasir. Password tersimpan terenkripsi (hash).
 
-![Halaman Login](docs/img/01-login.png)
+![Halaman Login](docs/img/01-login.jpeg)
 
 ### 2. Dashboard
 Ringkasan harian: total produk, pendapatan hari ini, jumlah transaksi,
@@ -60,14 +60,17 @@ Daftar pelanggan (termasuk tipe **kontraktor** yang berhak faktur A4) dan master
 
 | Fitur | Keterangan |
 |---|---|
-| 💰 Kasir (POS) | Pencarian barang, keranjang, diskon, kembalian, cetak struk 80mm |
+| 💰 Kasir (POS) | Pencarian barang, keranjang, diskon, **pajak 12%**, kembalian, cetak struk 80mm |
 | 🧾 Faktur A4 kontraktor | Pelanggan bertipe *kontraktor* otomatis dapat faktur A4 (selain struk thermal) |
 | 📦 Manajemen Produk | Satuan bervariasi: sak, pcs, batang, meter, dus, kg, liter, roll, m², m³ |
 | ⚡ Stok otomatis | Stok berkurang sendiri saat transaksi (Trigger SQL), kembali bila dibatalkan |
 | 👥 Pelanggan &amp; Supplier | Tipe pembeli (umum/reguler/kontraktor), master supplier + jumlah produk |
-| 📊 Laporan Penjualan | Harian &amp; bulanan + rincian faktur + grafik + **export CSV** (siap Excel) |
+| 📊 Laporan Penjualan | Harian &amp; bulanan + rincian faktur + grafik + **export CSV** (siap Excel) + **laba kotor** (omzet − harga beli) |
+| 🔄 Retur &amp; Nota Kredit | Retur barang → stok masuk kembali (nota kredit; faktur asal tidak dihapus) |
+| 🔔 Notifikasi Stok Menipis | Alert saat stok ≤ batas (email + WhatsApp webhook) |
 | 🩺 Diagnostik database | Tombol **Periksa &amp; Perbaiki** (admin): cek DB & trigger stok, biar &amp; perbaiki otomatis |
-| 🔐 Manajemen user | Tambah/edit/hapus akun + level (admin / kasir) |
+| 🧮 Laba Kotor | Laba bersih = omzet − harga beli per periode |
+| 🔐 Manajemen user | Tambah/edit/hapus akun + level (admin / kasir / **gudang**) |
 | 🏪 Identitas toko | Nama, alamat, telepon otomatis dipakai di login, sidebar, dan struk |
 | 🖥️ UI AdminLTE 4 | Sidebar, topbar, dropdown user — basis Bootstrap 5, responsif (desktop &amp; HP) |
 
@@ -108,17 +111,17 @@ Daftar pelanggan (termasuk tipe **kontraktor** yang berhak faktur A4) dan master
 
 ### Hak akses per level
 
-| Aksi | Admin | Kasir |
-|---|:---:|:---:|
-| Transaksi kasir / cetak struk | ✅ | ✅ |
-| Lihat dashboard &amp; daftar produk | ✅ | ✅ |
-| Lihat &amp; export laporan | ✅ | ✅ |
-| Tambah pelanggan (untuk POS) | ✅ | ✅ |
-| Tambah/edit/hapus produk | ✅ | ❌ |
-| Kelola master pelanggan &amp; supplier | ✅ | ❌ |
-| Pengaturan nama toko | ✅ | ❌ |
-| Tambah/edit/hapus user | ✅ | ❌ |
-| Diagnostik &amp; perbaiki database | ✅ | ❌ |
+| Aksi | Admin | Kasir | Gudang |
+|---|:---:|:---:|:---:|
+| Transaksi kasir / cetak struk | ✅ | ✅ | ✅ |
+| Lihat dashboard &amp; daftar produk | ✅ | ✅ | ❌ |
+| Lihat &amp; export laporan | ✅ | ✅ | ✅ |
+| Tambah pelanggan (untuk POS) | ✅ | ✅ | ❌ |
+| Tambah/edit/hapus produk | ✅ | ❌ | ❌ |
+| Kelola master pelanggan &amp; supplier | ✅ | ❌ | ❌ |
+| Pengaturan nama toko | ✅ | ❌ | ❌ |
+| Tambah/edit/hapus user | ✅ | ❌ | ❌ |
+| Diagnostik &amp; perbaiki database | ✅ | ❌ | ❌ |
 
 ---
 
@@ -141,17 +144,19 @@ TokoBangunan/
 │   ├── produk_list / produk_simpan / produk_hapus .php
 │   ├── pelanggan_list / pelanggan_simpan / pelanggan_hapus .php
 │   ├── supplier_list / supplier_simpan / supplier_hapus .php
-│   ├── penjualan_simpan.php     # simpan transaksi (aman, 1x klik)
+│   ├── penjualan_simpan.php     # simpan transaksi (pajak 12% dari tabel pengaturan, aman, 1x klik)
 │   ├── dashboard.php            # data ringkasan & grafik
 │   ├── laporan.php              # laporan harian/bulanan/detail + terlaris
+│   ├── laporan_laba.php         # laporan laba kotor (omzet - harga beli)
 │   ├── laporan_export.php       # unduh laporan sebagai CSV (BOM UTF-8)
 │   ├── cek_database.php         # status kesehatan DB (publik)
 │   ├── perbaiki_database.php    # buat ulang trigger/akun (admin)
-│   ├── pengaturan.php           # nama/alamat/telepon toko
+│   ├── pengaturan.php           # nama/alamat/telepon toko + tarif pajak (default 0.12)
+│   ├── retur_simpan.php         # retur / nota kredit (stok masuk kembali)
 │   └── user_list / user_simpan / user_hapus .php
 ├── db_tokobangunan.sql     # build database (import dulu!)
 ├── upgrade_v2.sql          # patch utk database lama
-├── test_pengujian.php      # 70 test otomatis (semua PASS)
+├── test_pengujian.php      # 77 test otomatis (semua PASS)
 └── docs/img/               # screenshot untuk README ini
 ```
 
@@ -182,11 +187,11 @@ TokoBangunan/
 
 ## 🧪 Menguji Sendiri Aplikasi
 
-Workspace ini dilengkapi **70 test otomatis** yang menguji semua fitur:
-login, CRUD produk, transaksi + trigger stok, dashboard, laporan + CSV,
-pelanggan/supplier, pengaturan, user, penolakan akses kasir, dan diagnostik
-database (termasuk simulasi trigger hilang → perbaikan otomatis). Status
-terakhir: **70 PASS / 0 GAGAL**.
+Workspace ini dilengkapi **77 test otomatis** yang menguji semua fitur:
+login, CRUD produk, transaksi + pajak 12% + trigger stok, dashboard, laporan +
+laba kotor + CSV, pelanggan/supplier, pengaturan, user (level gudang), retur,
+notifikasi stok, dan diagnostik database (termasuk simulasi trigger hilang →
+perbaikan otomatis). Status terakhir: **77 PASS / 0 GAGAL**.
 
 ```bash
 # 1. Pastikan MySQL & server PHP aktif
@@ -220,7 +225,8 @@ php test_pengujian.php
 - [x] Struk edisi **faktur A4** khusus kontraktor
 - [x] Diagnostik database + tombol **Periksa &amp; Perbaiki**
 - [x] Tampilan **AdminLTE 4** (sidebar, topbar, tema Bootstrap 5)
-- [ ] Notifikasi stok menipis (mis. kirim WhatsApp/email)
-- [ ] Retur &amp; nota kredit (stok masuk kembali otomatis, bukan hapus faktur)
-- [ ] Multi-outlet / peran gudang
-- [ ] Laporan laba kotor (harga beli vs jual per periode)
+- [x] Notifikasi stok menipis (mis. kirim WhatsApp/email) — via email + webhook
+- [x] Retur &amp; nota kredit (stok masuk kembali otomatis, bukan hapus faktur)
+- [x] Multi-outlet / peran gudang — level user `gudang` (warehouse)
+- [x] Laporan laba kotor (harga beli vs jual per periode)
+- [x] Pajak 12% per transaksi (tarif dari tabel pengaturan `pajak`)
