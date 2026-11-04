@@ -4,6 +4,9 @@ Aplikasi kasir &amp; manajemen toko bangunan berbasis web: input penjualan cepat
 stok berkurang **otomatis**, struk siap cetak, faktur A4 kontraktor, laporan +
 grafik + export CSV, serta halaman pengaturan nama toko &amp; manajemen user.
 
+> Fitur inti: **pajak 12%** tiap transaksi, **retur/nota kredit**, **laba kotor**,
+> **notifikasi stok menipis**, dan manajemen **level user** (admin / kasir / gudang).
+
 > Dibuat dengan **HTML + AdminLTE 4 (Bootstrap 5)** (tampilan, dengan **desain
 > profesional custom**), **PHP** (server/API), dan **MySQL** (database).
 
