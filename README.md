@@ -4,19 +4,21 @@ Aplikasi kasir &amp; manajemen toko bangunan berbasis web: input penjualan cepat
 stok berkurang **otomatis**, struk siap cetak, faktur A4 kontraktor, laporan +
 grafik + export CSV, serta halaman pengaturan nama toko &amp; manajemen user.
 
-> Dibuat dengan **HTML + AdminLTE 4 (Bootstrap 5)** (tampilan), **PHP**
-> (server/API), dan **MySQL** (database).
+> Dibuat dengan **HTML + AdminLTE 4 (Bootstrap 5)** (tampilan, dengan **desain
+> profesional custom**), **PHP** (server/API), dan **MySQL** (database).
 
 ---
 
 ## 🖼️ Tampilan Aplikasi
 
-> UI kini memakai **AdminLTE 4** (sidebar + topbar). Screenshot klasik di bawah
-> masih dari versi Bootstrap polos — tampilan terbaru serupa, menambah
-> menu **Pelanggan &amp; Supplier** dan **Laporan Penjualan**.
+> UI memakai **AdminLTE 4** (sidebar + topbar) dengan **desain profesional
+> custom**: card berlapis + shadow halus + hover elevation, background gradient
+> tipis, serta halaman login **single-page + glassmorphism** + **popup flash**.
+> Menambah menu **Pelanggan &amp; Supplier** dan **Laporan Penjualan**.
 
 ### 1. Halaman Login
-Satu pintu masuk untuk admin &amp; kasir. Password tersimpan terenkripsi (hash).
+Satu halaman (single-page) + glassmorphism, dengan **popup flash** untuk semua
+pesan error/validasi. Satu pintu masuk untuk admin &amp; kasir. Password tersimpan terenkripsi (hash).
 
 ![Halaman Login](docs/img/01-login.jpeg)
 
@@ -72,7 +74,7 @@ Daftar pelanggan (termasuk tipe **kontraktor** yang berhak faktur A4) dan master
 | 🧮 Laba Kotor | Laba bersih = omzet − harga beli per periode |
 | 🔐 Manajemen user | Tambah/edit/hapus akun + level (admin / kasir / **gudang**) |
 | 🏪 Identitas toko | Nama, alamat, telepon otomatis dipakai di login, sidebar, dan struk |
-| 🖥️ UI AdminLTE 4 | Sidebar, topbar, dropdown user — basis Bootstrap 5, responsif (desktop &amp; HP) |
+| 🖥️ UI AdminLTE 4 | Sidebar, topbar, dropdown user — basis Bootstrap 5, responsif (desktop &amp; HP); desain profesional custom, glassmorphism, popup flash |
 
 ---
 
@@ -129,7 +131,7 @@ Daftar pelanggan (termasuk tipe **kontraktor** yang berhak faktur A4) dan master
 
 ```
 TokoBangunan/
-├── login.html              # Halaman login (AdminLTE)
+├── login.html              # Halaman login (single-page + glassmorphism + popup flash)
 ├── dashboard.html          # Ringkasan + grafik (Chart.js)
 ├── kasir.html              # Transaksi kasir + struk 80mm + faktur A4
 ├── produk.html             # Master produk (CRUD)
@@ -192,6 +194,11 @@ login, CRUD produk, transaksi + pajak 12% + trigger stok, dashboard, laporan +
 laba kotor + CSV, pelanggan/supplier, pengaturan, user (level gudang), retur,
 notifikasi stok, dan diagnostik database (termasuk simulasi trigger hilang →
 perbaikan otomatis). Status terakhir: **77 PASS / 0 GAGAL**.
+
+Selain itu, workspace juga telah diuji: **pengujian tampilan** via browser
+(0 error console di semua halaman utama), **pengujian 1000 data** (produk +
+pelanggan uji → API OK), dan **pengujian cyber security** (SQLi/XSS/unauth/
+method-abuse/negative-value semuanya ditolak).
 
 ```bash
 # 1. Pastikan MySQL & server PHP aktif
