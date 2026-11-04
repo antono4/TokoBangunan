@@ -13,75 +13,32 @@
 <link href="https://cdn.jsdelivr.net/npm/admin-lte@4.10.0/dist/css/adminlte.min.css" rel="stylesheet">
 
 <style>
-  /* ================= SPLIT-SCREEN LOGIN ================= */
+  /* ================= SINGLE-PAGE LOGIN ================= */
+  body.login-page {
+    background: linear-gradient(135deg, #1b2431 0%, #0d6efd 150%);
+  }
+
   .login-wrap {
     display: flex;
     min-height: 100vh;
-  }
-
-  /* Panel kiri: gambar */
-  .login-image {
-    position: relative;
-    flex: 0 0 50%;
-    height: 100vh;
-    min-height: 100vh;
-    display: none; /* sembunyi di HP, tampil di desktop */
-  }
-  @media (min-width: 768px) {
-    .login-image { display: flex; }
-  }
-  .login-image .login-img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-  }
-  .login-image .overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(27,36,49,.78) 0%, rgba(13,110,253,.55) 100%);
-  }
-  .login-image .brand-content {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    color: #fff;
-    padding: 3rem 2rem;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-
-  /* Panel kanan: form login */
-  .login-form-panel {
-    flex: 1 1 50%;
-    height: 100vh;
-    min-height: 100vh;
-    display: flex;
     align-items: center;
     justify-content: center;
     padding: 2rem 1rem;
-    background: #f8f9fa;
   }
 
   .login-card {
     width: 100%;
-    max-width: 400px;
+    max-width: 420px;
     border: none;
     border-radius: 1.5rem;
     box-shadow: 0 24px 60px rgba(0,0,0,.16);
-    /* Efek Glassmorphism */
-    background: rgba(255,255,255,.92);
+    background: rgba(255,255,255,.96);
     backdrop-filter: blur(24px) saturate(1.2);
     -webkit-backdrop-filter: blur(24px) saturate(1.2);
     border: 1px solid rgba(255,255,255,.7);
   }
   .login-card .card-body {
-    padding: 2.5rem 2rem;
+    padding: 2.5rem 2.25rem;
   }
   .login-card .login-header {
     text-align: center;
@@ -115,19 +72,9 @@
     margin-top: 1.5rem;
   }
 
-  /* Responsif: HP -> susun vertikal */
+  /* Responsif */
   @media (max-width: 767.98px) {
-    .login-wrap { flex-direction: column; }
-    .login-image {
-      display: block;
-      flex: 0 0 auto;
-      height: 32vh;
-      min-height: 240px;
-    }
-    .login-image .brand-content { padding: 1.5rem 1rem; }
-    .login-image .brand-content h2 { font-size: 1.5rem; }
-    .login-image .brand-content i { font-size: 2.2rem; }
-    .login-form-panel { flex: 1; padding: 1.5rem 1rem; }
+    .login-wrap { padding: 1.5rem 1rem; }
     .login-card { max-width: 100%; border-radius: 1rem; }
   }
 </style>
@@ -136,69 +83,66 @@
 
 <div class="login-wrap">
 
-  <!-- ============ KIRI: GAMBAR ============ -->
-  <div class="login-image">
-    <img
-      src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1200&auto=format&fit=crop&q=80&ixlib=rb-4.0.3"
-      alt="Gudang material bangunan"
-      class="login-img"
-    >
-    <div class="overlay"></div>
-    <div class="brand-content">
-      <i class="bi bi-hammer"></i>
-      <h2 class="fw-bold mb-2" id="brand-nama-img">TOKO BANGUNAN</h2>
-      <p class="mb-0 opacity-90">Aplikasi Penjualan &amp; Kasir</p>
-      <p class="tagline">Kelola transaksi, stok, pelanggan, dan laporan penjualan dari satu tempat.</p>
+  <!-- ============ FORM LOGIN (SATU HALAMAN) ============ -->
+  <div class="card login-card">
+    <div class="card-body p-4 p-md-5">
+
+      <div class="login-header">
+        <i class="bi bi-box-arrow-in-right"></i>
+        <h3 class="fw-bold mb-0" id="brand-nama">TOKO BANGUNAN</h3>
+        <p>Masuk ke akun admin atau kasir</p>
+      </div>
+
+      <div id="banner-diagnostik" class="alert alert-warning py-2 small d-none" role="alert">
+        <b><i class="bi bi-buildings-fill me-1"></i>Perlu Perbaikan Backend</b>
+        <ol class="ps-3 mb-1 mt-1" id="daftar-kendala"></ol>
+        <div class="text-secondary">Setelah diperbaiki, muat ulang halaman ini.</div>
+      </div>
+
+      <form id="form-login" onsubmit="doLogin(event)">
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
+            <input type="text" class="form-control" id="username" required autocomplete="username" autofocus
+                   pattern="[a-zA-Z0-9._\-]{3,50}"
+                   title="Username 3-50 karakter: huruf, angka, titik, garis bawah, dan minus.">
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Password</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
+            <input type="password" class="form-control" id="password" required autocomplete="current-password">
+            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+              <i class="bi bi-eye" id="eye-icon"></i>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100 btn-lg fw-bold" id="btn-login">
+          <span id="btn-text"><i class="bi bi-box-arrow-in-right me-2"></i>Login</span>
+        </button>
+      </form>
+
     </div>
   </div>
 
-  <!-- ============ KANAN: FORM LOGIN ============ -->
-  <div class="login-form-panel">
-    <div class="card login-card">
-      <div class="card-body p-4 p-md-5">
+</div>
 
-        <div class="login-header">
-          <i class="bi bi-box-arrow-in-right"></i>
-          <h3 class="fw-bold mb-0" id="brand-nama">TOKO BANGUNAN</h3>
-          <p>Masuk ke akun admin atau kasir</p>
-        </div>
-
-        <div id="alert-login" class="alert alert-danger py-2 small d-none" role="alert"></div>
-        <div id="banner-diagnostik" class="alert alert-warning py-2 small d-none" role="alert">
-          <b><i class="bi bi-buildings-fill me-1"></i>Perlu Perbaikan Backend</b>
-          <ol class="ps-3 mb-1 mt-1" id="daftar-kendala"></ol>
-          <div class="text-secondary">Setelah diperbaiki, muat ulang halaman ini.</div>
-        </div>
-
-        <form id="form-login" onsubmit="doLogin(event)">
-          <div class="mb-3">
-            <label class="form-label">Username</label>
-            <div class="input-group">
-              <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
-              <input type="text" class="form-control" id="username" required autocomplete="username" autofocus
-                     pattern="[a-zA-Z0-9._\-]{3,50}"
-                     title="Username 3-50 karakter: huruf, angka, titik, garis bawah, dan minus.">
-            </div>
-          </div>
-          <div class="mb-4">
-            <label class="form-label">Password</label>
-            <div class="input-group">
-              <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
-              <input type="password" class="form-control" id="password" required autocomplete="current-password">
-              <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
-                <i class="bi bi-eye" id="eye-icon"></i>
-              </button>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary w-100 btn-lg fw-bold" id="btn-login">
-            <span id="btn-text"><i class="bi bi-box-arrow-in-right me-2"></i>Login</span>
-          </button>
-        </form>
-
+<!-- Modal Popup Flash -->
+<div class="modal fade" id="modal-flash" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-transparent">
+        <h5 class="modal-title fw-bold" id="flash-judul"><i class="bi bi-exclamation-triangle-fill me-2"></i>Perlu Perhatian</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body" id="flash-body"></div>
+      <div class="modal-footer bg-transparent">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
       </div>
     </div>
   </div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
@@ -210,8 +154,7 @@ fetch('api/pengaturan.php')
   .then(j => {
     if (j.ok) {
       const nama = j.pengaturan.nama_toko;
-      document.getElementById('brand-nama').textContent     = nama;
-      document.getElementById('brand-nama-img').textContent = nama;
+      document.getElementById('brand-nama').textContent = nama;
     }
   })
   .catch(() => {});
@@ -241,31 +184,40 @@ function togglePassword() {
   eye.className = el.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
 }
 
+// ---------- POPUP FLASH (Bootstrap modal) ----------
+let modalFlash = null;
+
+function tampilFlash(pesan, tipe) {
+  const body = document.getElementById('flash-body');
+  const ikon = (tipe === 'success')
+    ? 'bi bi-check-circle-fill text-success'
+    : (tipe === 'warning')
+      ? 'bi bi-exclamation-triangle-fill text-warning'
+      : 'bi bi-exclamation-triangle-fill text-danger';
+  body.innerHTML =
+    '<div class="d-flex align-items-start gap-2">' +
+      `<i class="bi ${ikon} fs-2"></i>` +
+      `<div>${pesan}</div>` +
+    '</div>';
+  if (!modalFlash) {
+    modalFlash = new bootstrap.Modal(document.getElementById('modal-flash'), {
+      keyboard: false, backdrop: 'static'
+    });
+  }
+  modalFlash.show();
+}
+
 async function doLogin(e) {
   e.preventDefault();
-  const alertBox = document.getElementById('alert-login');
   const btn      = document.getElementById('btn-login');
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
 
-  // Validasi sisi klien (sinkron dengan server)
-  if (username === '' || password === '') {
-    alertBox.textContent = 'Username dan password wajib diisi.';
-    alertBox.classList.remove('d-none');
-    return;
-  }
-  if (username.length < 3 || username.length > 50) {
-    alertBox.textContent = 'Username harus 3-50 karakter.';
-    alertBox.classList.remove('d-none');
-    return;
-  }
-  if (!/^[a-zA-Z0-9._-]+$/.test(username)) {
-    alertBox.textContent = 'Username hanya boleh huruf, angka, titik, garis bawah, dan minus.';
-    alertBox.classList.remove('d-none');
-    return;
-  }
+  // Validasi sisi klien (sinkron dengan server) -> popup flash
+  if (username === '' || password === '') { tampilFlash('Username dan password wajib diisi.', 'danger'); return; }
+  if (username.length < 3 || username.length > 50) { tampilFlash('Username harus 3-50 karakter.', 'danger'); return; }
+  if (!/^[a-zA-Z0-9._-]+$/.test(username)) { tampilFlash('Username hanya boleh huruf, angka, titik, garis bawah, dan minus.', 'danger'); return; }
 
-  alertBox.classList.add('d-none');
   btn.disabled = true;
   document.getElementById('btn-text').innerHTML =
     '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
@@ -285,17 +237,14 @@ async function doLogin(e) {
       location.href = 'dashboard.html';
       return;
     }
-    alertBox.textContent = json.message || 'Login gagal.';
-    alertBox.classList.remove('d-none');
+    tampilFlash(json.message || 'Login gagal.', 'danger');
   } catch (err) {
-    alertBox.innerHTML =
-      'Tidak dapat terhubung ke server (API). Checklist cepat:' +
-      '<ul class="mb-0 ps-3">' +
+    tampilFlash(
+      'Tidak dapat terhubung ke server (API). Checklist cepat:<ol class="ps-3 mb-0">' +
       '<li>Modul <b>Apache</b> &amp; <b>MySQL</b> di XAMPP sudah Start?</li>' +
       '<li>Folder aplikasi ada di <code>C:\\xampp\\htdocs\\TokoBangunan</code>?</li>' +
       '<li>Akses halaman via <code>http://localhost/...</code> (bukan file://)?</li>' +
-      '</ul>';
-    alertBox.classList.remove('d-none');
+      '</ol>', 'danger');
   } finally {
     btn.disabled = false;
     document.getElementById('btn-text').innerHTML =
