@@ -29,25 +29,25 @@ pesan error/validasi. Satu pintu masuk untuk admin &amp; kasir. Password tersimp
 Ringkasan harian: total produk, pendapatan hari ini, jumlah transaksi,
 **peringatan stok menipis**, dan grafik penjualan + barang paling laris.
 
-![Dashboard](docs/img/02-dashboard.png)
+![Dashboard](docs/img/02-dashboard.jpeg)
 
 ### 3. Kasir (POS)
 Cari barang → masuk keranjang → isi diskon &amp; uang bayar → kembalian
 terhitung otomatis → cetak struk. Satuan mengikuti barang (sak/pcs/batang/meter).
 
-![Kasir](docs/img/03-kasir.png)
+![Kasir](docs/img/03-kasir.jpeg)
 
 ### 4. Manajemen Produk
 Daftar seluruh material: harga beli/jual, stok (badge merah = menipis),
 supplier, serta tombol tambah/edit/hapus.
 
-![Manajemen Produk](docs/img/04-produk.png)
+![Manajemen Produk](docs/img/04-produk.jpeg)
 
 ### 5. Pengaturan &amp; User (khusus admin)
 Edit **nama/alamat/telepon toko** (otomatis dipakai di seluruh aplikasi dan struk),
 kelola akun user beserta **level**-nya, serta tombol **Periksa &amp; Perbaiki** database.
 
-![Pengaturan & User](docs/img/05-pengaturan.png)
+![Pengaturan & User](docs/img/05-pengaturan.jpeg)
 
 ### 6. Laporan Penjualan
 Grafik omzet harian, produk terlaris, rincian transaksi, dan **export CSV** siap dibuka Excel.
